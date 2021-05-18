@@ -5,6 +5,5 @@ pillow
 scikit-learn
 easydict
 scipy
-glob
 pandas
 tqdm
