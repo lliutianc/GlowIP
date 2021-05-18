@@ -1,0 +1,11 @@
+tensorflow==1.12
+numpy
+matplotlib
+scikit-image
+pillow
+scikit-learn
+easydict
+scipy
+glob
+pandas
+tqdm
