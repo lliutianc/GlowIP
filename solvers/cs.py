@@ -18,8 +18,9 @@ from scipy.linalg import null_space
 import warnings
 warnings.filterwarnings("ignore")
 
-root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print(root_path)
+# root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+root_path = '/mnt/home/f0102558/dev/GlowIP'
+# print(root_path)
 
 def solveCS(args):
     if args.prior == 'glow':
