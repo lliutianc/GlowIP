@@ -18,8 +18,8 @@ from scipy.linalg import null_space
 import warnings
 warnings.filterwarnings("ignore")
 
-current_path = os.path.dirname(os.path.abspath(__file__))
-print(current_path)
+root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def solveCS(args):
     if args.prior == 'glow':
@@ -44,9 +44,9 @@ def GlowCS(args):
     for m, gamma, init_norm in loopOver:
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
         n                  = args.size*args.size*3
-        modeldir           = os.path.join(current_path, "trained_models/%s/glow"%args.model)
-        test_folder        = os.path.join(current_path, "test_images/%s"%args.dataset)
-        save_path          = os.path.join(current_path, "results/%s/%s"%(args.dataset,args.experiment))
+        modeldir           = os.path.join(root_path, "trained_models/%s/glow"%args.model)
+        test_folder        = os.path.join(root_path, "test_images/%s"%args.dataset)
+        save_path          = os.path.join(root_path, "results/%s/%s"%(args.dataset,args.experiment))
 
         # loading dataset
         trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
