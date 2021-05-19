@@ -45,7 +45,7 @@ def GlowCS(args):
     for m, gamma, init_norm in loopOver:
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
         n                  = args.size*args.size*3
-        modeldir           = os.path.join(root_path, "trained_models/%s/glow"%args.model)
+        modeldir           = os.path.join(root_path, "trained_models/%s/glow-cs-%d"%(args.model, args.size))
         test_folder        = os.path.join(root_path, "test_images/%s"%args.dataset)
         save_path          = os.path.join(root_path, "results/%s/%s"%(args.dataset,args.experiment))
 
