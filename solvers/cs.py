@@ -173,31 +173,34 @@ def GlowCS(args):
             residual  = []; recorded_z = []
             # running optimizer steps
             for t in range(args.steps):
-                def closure():
-                    optimizer.zero_grad()
-                    z_unflat    = glow.unflatten_z(z_sampled, clone=False)
-                    x_gen       = glow(z_unflat, reverse=True, reverse_clone=False)
-                    x_gen       = glow.postprocess(x_gen,floor_clamp=False)
-                    x_test_flat = x_test.view([-1,n])
-                    x_gen_flat  = x_gen.view([-1,n])
-                    y_true      = torch.matmul(x_test_flat, A) + noise
-                    y_gen       = torch.matmul(x_gen_flat, A) 
-                    global residual_t
-                    residual_t = ((y_gen - y_true)**2).sum(dim=1).mean()
-                    if not args.z_penalty_unsquared:
-                        z_reg_loss_t= gamma*(z_sampled.norm(dim=1)**2).mean()
-                    else:
-                        z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
-                    loss_t      = residual_t + z_reg_loss_t
-                    psnr        = psnr_t(x_test, x_gen)
-                    psnr        = 10 * np.log10(1 / psnr.item())
-                    print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
-                    loss_t.backward(retain_graph=True)
-                    return loss_t
                 try:
+                    def closure():
+                        optimizer.zero_grad()
+                        z_unflat = glow.unflatten_z(z_sampled, clone=False)
+                        x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+                        x_gen = glow.postprocess(x_gen, floor_clamp=False)
+                        x_test_flat = x_test.view([-1, n])
+                        x_gen_flat = x_gen.view([-1, n])
+                        y_true = torch.matmul(x_test_flat, A) + noise
+                        y_gen = torch.matmul(x_gen_flat, A)
+                        # global residual_t
+                        residual_t = ((y_gen - y_true) ** 2).sum(dim=1).mean()
+                        residual.append(residual_t.item())
+
+                        if not args.z_penalty_unsquared:
+                            z_reg_loss_t = gamma * (z_sampled.norm(dim=1) ** 2).mean()
+                        else:
+                            z_reg_loss_t = gamma * z_sampled.norm(dim=1).mean()
+                        loss_t = residual_t + z_reg_loss_t
+                        psnr = psnr_t(x_test, x_gen)
+                        psnr = 10 * np.log10(1 / psnr.item())
+                        print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f" % (
+                        t, loss_t.item(), residual_t.item(), z_reg_loss_t.item(), psnr), end="\r")
+                        loss_t.backward()
+                        return loss_t
+
                     optimizer.step(closure)
                     recorded_z.append(z_sampled.data.cpu().numpy())
-                    residual.append(residual_t.item())
                 except Exception as e:
                     # try may not work due to instability in the reverse direction.
                     traceback.print_exc()
