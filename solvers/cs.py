@@ -199,7 +199,7 @@ def GlowCS(args):
                     residual.append(residual_t.item())
                 except Exception as e:
                     # try may not work due to instability in the reverse direction.
-                    print(e)
+                    print(e.__traceback__)
                     skip_to_next = True
                     break
             
