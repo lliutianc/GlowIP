@@ -18,9 +18,10 @@ from scipy.linalg import null_space
 import warnings
 warnings.filterwarnings("ignore")
 
-# root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import traceback
+
 root_path = '/mnt/home/f0102558/dev/GlowIP'
-# print(root_path)
+
 
 def solveCS(args):
     if args.prior == 'glow':
@@ -199,7 +200,8 @@ def GlowCS(args):
                     residual.append(residual_t.item())
                 except Exception as e:
                     # try may not work due to instability in the reverse direction.
-                    print(e.__traceback__)
+                    traceback.print_exc()
+
                     skip_to_next = True
                     break
             
