@@ -194,7 +194,9 @@ if __name__ == "__main__":
     parser.add_argument('-squeeze_contig', action="store_true", help="whether to select contiguous components of activations in each squeeze layer")
     parser.add_argument('-device',type=str,help='whether to use',default="cuda")    
     args = parser.parse_args()
+
+    print(torch.cuda.is_available())
+
     trainGlow(args)
-    
 
 
