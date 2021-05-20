@@ -13,7 +13,6 @@ import re
 from collections import defaultdict
 
 def trainGlow(args):
-def trainGlow(args):
     save_path   = "./trained_models/%s/glow"%args.dataset
     training_folder = "./data/%s_preprocessed/train"%args.dataset
     
@@ -197,11 +196,7 @@ if __name__ == "__main__":
     parser.add_argument('-cuda',type=int,help='which gpu to use',default=6)
     args = parser.parse_args()
 
-    # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.cuda)
-
-    # print(f'Prepare: check process on cuda: {args.cuda}...')
-    args.device = torch.device(f'cuda:{args.gpu}' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(f'cuda:{args.cuda}' if torch.cuda.is_available() else 'cpu')
 
     trainGlow(args)
 
