@@ -8,10 +8,11 @@ import skimage.io as sio
 from skimage.transform import resize
 import torch.utils.checkpoint as checkpoint
 # device 
-if torch.cuda.is_available():
-    device = "cuda"
-else:
-    device = "cpu"
+# if torch.cuda.is_available():
+#     device = "cuda"
+# else:
+#     device = "cpu"
+
 
 class Glow(nn.Module):
     def __init__(self, image_shape, K, L,
