@@ -29,9 +29,9 @@ def GlowInpaint(args):
     for gamma in loopOver:
         skip_to_next = False # flag to skip to next loop if recovery is fails due to instability
         n             = args.size*args.size*3
-        modeldir      = "./trained_models/%s/glow"%args.model
-        test_folder   = "./test_images/%s"%args.dataset
-        save_path     = "./results/%s/%s"%(args.dataset,args.experiment)
+        modeldir      = f"./trained_models/{args.model}/glow-cs-{args.size}"
+        test_folder   = f"./test_images/{args.dataset}"
+        save_path     = f"./results/{args.dataset}/{args.experiment}"
         
         # loading dataset
         trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
@@ -72,7 +72,7 @@ def GlowInpaint(args):
                         n_bits_x=configs["n_bits_x"],
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
-            glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt"))
+            glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
             glow.eval()   
             
             # making a forward to record shapes of z's for reverse pass
