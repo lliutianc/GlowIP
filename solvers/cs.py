@@ -96,8 +96,6 @@ def GlowCS(args):
             glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
             glow.eval()
 
-            print(glow.device)
-            exit(1)
             # making a forward to record shapes of z's for reverse pass
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
             
