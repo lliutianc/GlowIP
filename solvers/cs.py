@@ -93,7 +93,7 @@ def GlowCS(args):
                         n_bits_x=configs["n_bits_x"],
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
-            glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt"))
+            glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
             glow.eval()
 
             print(glow.device)
