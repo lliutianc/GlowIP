@@ -228,7 +228,8 @@ def GlowCS(args):
             glow.zero_grad()
             optimizer.zero_grad()
             del x_test, x_gen, optimizer, psnr_t, z_sampled, glow
-            torch.cuda.empty_cache()
+            with torch.cuda.device(args.device):
+                torch.cuda.empty_cache()
             print("\nbatch completed")
         
         if skip_to_next:
