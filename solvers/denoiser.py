@@ -30,7 +30,7 @@ def Noiser(args):
     if args.noise != 'gaussian':
         raise NotImplementedError
 
-    noise = gaussian_noise(args.loc, args.scale)
+    noise = gaussian_noise(args.noise_loc, args.noise_scale)
     noiser = NoisyMeasurement(noise, args.noise_channel, args.noise_area)
 
     return noiser

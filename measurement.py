@@ -45,5 +45,5 @@ class NoisyMeasurement:
         return noise + images
 
 
-def gaussian_noise(mean, std):
-    return lambda size: np.random.normal(size=size, loc=mean, scale=std)
+def gaussian_noise(loc, scale):
+    return lambda size: np.random.normal(size=size, loc=loc, scale=scale)
