@@ -1,10 +1,10 @@
 import numpy as np
-
+import torch
 from measurement.measurement import Measurement
 
 
 class NoisyMeasurement(Measurement):
-    def __init__(self, distribution, channel=None, area=None):
+    def __init__(self, distribution, channel=None, area=None, device='cpu'):
         """
         distribution: (partial) function to generate noise of specific sizes,
         channel: specify the first C channels to add noise,
@@ -17,6 +17,7 @@ class NoisyMeasurement(Measurement):
         self.distribution = distribution
         self.area = area
         self.channel = channel
+        self.device = device
 
     def forward(self, images):
         img_num_channel = images.shape[1]
@@ -29,6 +30,8 @@ class NoisyMeasurement(Measurement):
                 channel_mask = np.zeros_like(noise)
                 channel_mask[:, self.channel, ...] = 1.
                 noise *= channel_mask
+
+        # add area mask
 
         if self.area:
             img_height, img_width = images.shape[-2:]
@@ -44,7 +47,8 @@ class NoisyMeasurement(Measurement):
             area_mask[mask_row_s:mask_row_e, mask_col_s:mask_col_e] = 1.
             noise *= area_mask
 
-        return noise + images
+        noise = torch.tensor(noise, dtype=torch.float, requires_grad=False, device=self.device)
+        return noise
 
 
 def gaussian_noise(loc, scale):

@@ -31,7 +31,7 @@ def Noiser(args):
         raise NotImplementedError
 
     noise = gaussian_noise(args.noise_loc, args.noise_scale)
-    noiser = NoisyMeasurement(noise, args.noise_channel, args.noise_area)
+    noiser = NoisyMeasurement(noise, args.noise_channel, args.noise_area, args.device)
 
     return noiser
 
@@ -74,10 +74,6 @@ def GlowDenoiser(args):
             n_test = x_test.size()[0]
             assert n_test == args.batchsize, "please make sure that no. of images are evenly divided by batchsize"
 
-            # noise to be added
-            noise = noiser(x_test)
-            noise = torch.tensor(noise, dtype=torch.float, requires_grad=False, device=args.device)
-
             #
             # if args.noise == "gaussian":
             #     noise = np.random.normal(0, args.noise_std, size=(n_test, 3, args.size,args.size))
@@ -99,6 +95,9 @@ def GlowDenoiser(args):
                         device=args.device)
             glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
             glow.eval()
+
+            # noise to add
+            noise = noiser(x_test)
 
             # making a forward to record shapes of z's for reverse pass
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
