@@ -30,9 +30,9 @@ def GlowDenoiser(args):
     for gamma in loopOver:
         skip_to_next  = False # flag to skip to next loop if recovery is fails due to instability
         n             = args.size*args.size*3
-        modeldir      = "./trained_models/%s/glow"%args.model
-        test_folder   = "./test_images/%s"%args.dataset
-        save_path     = "./results/%s/%s"%(args.dataset,args.experiment)
+        modeldir      = f"./trained_models/{args.model}/glow-denoising"
+        test_folder   = f"./test_images/{args.dataset}_N=12"
+        save_path     = f"./results/{args.dataset}/{args.experiment}"
         
         # loading dataset
         trans           = transforms.Compose([transforms.Resize((args.size,args.size)),transforms.ToTensor()])
@@ -77,7 +77,7 @@ def GlowDenoiser(args):
                         n_bits_x=configs["n_bits_x"],
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device)
-            glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt"))
+            glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
             glow.eval()            
             
             # making a forward to record shapes of z's for reverse pass
@@ -124,7 +124,7 @@ def GlowDenoiser(args):
                     psnr        = psnr_t(x_test, x_gen)
                     psnr        = 10 * np.log10(1 / psnr.item())
                     print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
-                    loss_t.backward()
+                    loss_t.backward(retain_graph=True)
                     return loss_t
                 try:
                     optimizer.step(closure)
@@ -156,7 +156,8 @@ def GlowDenoiser(args):
             glow.zero_grad()
             optimizer.zero_grad()
             del x_test, x_gen, optimizer, psnr_t, z_sampled, glow, noise,
-            torch.cuda.empty_cache()
+            with torch.cuda.device(args.device):
+                torch.cuda.empty_cache()
             print("\nbatch completed")
         
         if skip_to_next:

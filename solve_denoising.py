@@ -1,6 +1,7 @@
 import argparse
 from solvers.denoiser import solveDenoising
 
+import torch
 
         
 if __name__ == "__main__":
@@ -24,7 +25,9 @@ if __name__ == "__main__":
     parser.add_argument('-save_results',type=bool,help='whether to save results after experiments conclude',default=True)
     parser.add_argument('-z_penalty_unsquared', action="store_true",help="use ||z|| if True else ||z||^2")
     args = parser.parse_args()
+
+    args.device = torch.device(f'cuda:{args.cuda}' if torch.cuda.is_available() else 'cpu')
+
     solveDenoising(args)
     
-
-    
+# python solve_denoising.py -experiment exp1 -dataset celeba -prior glow -model celeba -noise_std 0.1 -gamma 0 -init_std 0.1
