@@ -12,6 +12,7 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
+import traceback
 
 
 def solveDenoising(args):
@@ -130,7 +131,9 @@ def GlowDenoiser(args):
                 try:
                     optimizer.step(closure)
                     residual.append(residual_t.item())
-                except:
+                except Exception as e:
+                    traceback.print_exc()
+
                     skip_to_next = True
                     break
             
