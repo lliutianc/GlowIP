@@ -118,7 +118,7 @@ def GlowDenoiser(args):
                     x_noisy     = x_test + noise
                     global residual_t
                     residual_t  = ((x_gen - x_noisy)**2).view(len(x_noisy),-1).sum(dim=1).mean()                        
-                    if args.z_penalty_squared:
+                    if not args.z_penalty_unsquared:
                         z_reg_loss_t= gamma*(z_sampled.norm(dim=1)**2).mean()
                     else:
                         z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
