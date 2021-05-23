@@ -16,7 +16,10 @@ class NoisyMeasurement:
         self.area = area
         self.channel = channel
 
-    def add_noise(self, images):
+    def __call__(self, images):
+        return self._add_noise(images)
+
+    def _add_noise(self, images):
         img_num_channel = images.shape[1]
         noise = self.distribution(images.shape)
 
