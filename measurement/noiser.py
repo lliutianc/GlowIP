@@ -1,7 +1,9 @@
 import numpy as np
 
+from measurement.measurement import Measurement
 
-class NoisyMeasurement:
+
+class NoisyMeasurement(Measurement):
     def __init__(self, distribution, channel=None, area=None):
         """
         distribution: (partial) function to generate noise of specific sizes,
@@ -16,10 +18,7 @@ class NoisyMeasurement:
         self.area = area
         self.channel = channel
 
-    def __call__(self, images):
-        return self._add_noise(images)
-
-    def _add_noise(self, images):
+    def forward(self, images):
         img_num_channel = images.shape[1]
         noise = self.distribution(images.shape)
 

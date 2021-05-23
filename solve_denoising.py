@@ -42,4 +42,5 @@ if __name__ == "__main__":
 
     solveDenoising(args)
 
-# python solve_denoising.py -experiment exp1 -dataset celeba -prior glow -model celeba -noise_std 0.1 -gamma 0 -init_std 0.1
+
+# python solve_denoising.py -prior glow -experiment denoise -dataset celeba -gamma 0.75 -batchsize 1

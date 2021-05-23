@@ -14,7 +14,7 @@ import traceback
 
 from glow.glow import Glow
 from dcgan.dcgan import Generator
-from measurement import NoisyMeasurement, gaussian_noise
+from measurement.noiser import NoisyMeasurement, gaussian_noise
 
 
 def solveDenoising(args):
