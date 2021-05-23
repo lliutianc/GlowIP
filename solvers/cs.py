@@ -93,9 +93,10 @@ def GlowCS(args):
                         n_bits_x=configs["n_bits_x"],
                         nn_init_last_zeros=configs["last_zeros"],
                         device=args.device).to(args.device)
+            print(glow.device)
+
             glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
             glow.eval()
-            print(glow.device)
             # making a forward to record shapes of z's for reverse pass
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
             
