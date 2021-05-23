@@ -27,8 +27,10 @@ if __name__ == "__main__":
     parser.add_argument('-cuda',type=int,help='which gpu to use',default=6)
     args = parser.parse_args()
 
-    args.device = torch.device(f'cuda:{args.cuda}' if torch.cuda.is_available() else 'cpu')
+    # args.device = torch.device(f'cuda:{args.cuda}' if torch.cuda.is_available() else 'cpu')
+    args.device = torch.device('cpu')
     solveCS(args)
+
     
 # python solve_cs.py -experiment exp1 -dataset celeba -prior glow -model celeba -m 12288 \
 # -lr 0.05 -gamma 0 -init_std 0 -batchsize 1 -steps 50
