@@ -1,6 +1,7 @@
 import argparse
 from solvers.cs import solveCS
 
+import torch
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='solve compressive sensing')
@@ -23,6 +24,11 @@ if __name__ == "__main__":
     parser.add_argument('-save_metrics_text',type=bool, help='whether to save results to a text file',default=True)
     parser.add_argument('-save_results',type=bool,help='whether to save results after experiments conclude',default=True)
     parser.add_argument('-z_penalty_unsquared', action="store_true",help="use ||z|| if True else ||z||^2")
+    parser.add_argument('-cuda',type=int,help='which gpu to use',default=6)
     args = parser.parse_args()
+
+    args.device = torch.device(f'cuda:{args.cuda}' if torch.cuda.is_available() else 'cpu')
     solveCS(args)
     
+# python solve_cs.py -experiment exp1 -dataset celeba -prior glow -model celeba -m 12288 \
+# -lr 0.05 -gamma 0 -init_std 0 -batchsize 1 -steps 50
