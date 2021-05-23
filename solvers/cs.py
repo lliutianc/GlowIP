@@ -86,6 +86,7 @@ def GlowCS(args):
             assert n_test == args.batchsize, "please make sure that no. of images are evenly divided by batchsize"
             
             # loading glow model
+            print(f'load glow from: {modeldir}...')
             glow = Glow((3,args.size,args.size),
                         K=configs["K"],L=configs["L"],
                         coupling=configs["coupling"],
