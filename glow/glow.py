@@ -35,12 +35,16 @@ class Glow(nn.Module):
         
         for l in range(L-1):
             # step of flows
+            # squeeze: transform a s x s x c image to s/2 x s/2 x 4c one.
             squeeze = Squeeze(factor=2, contiguous=self.squeeze_contig)
+            # channel number becomes four times
             c = c * 4
             self.glow_modules.append(squeeze)
             for k in range(K):
+                # basic flow layer
                 flow = Flow(c,self.coupling,device,self.coupling_bias,self.nn_init_last_zeros)
                 self.glow_modules.append(flow)
+
             split = Split()
             c = c // 2
             self.glow_modules.append(split)
@@ -59,7 +63,9 @@ class Glow(nn.Module):
             n,c,h,w = x.size()
             Z = []
             if logdet is None:
+                # initialize the log-det term.
                 logdet = torch.tensor(0.0,requires_grad=False,device=self.device,dtype=torch.float)
+
             for i in range( len(self.glow_modules) ):
                 module_name = self.glow_modules[i].__class__.__name__
                 if  module_name == "Squeeze":
@@ -73,7 +79,8 @@ class Glow(nn.Module):
                     raise "Unknown Layer"
 
             Z.append(x)
-            
+
+            # current: false (cannot be specified to True)
             if not self.init_resizer:
                 self.sizes = [t.size() for t in Z]
                 self.init_resizer = True
@@ -102,9 +109,11 @@ class Glow(nn.Module):
     def nll_loss(self, x, logdet=None):
         n,c,h,w = x.size()
         z, logdet, actloss = self.forward(x,logdet=logdet,reverse=False)
+
         if not self.init_resizer:
             self.sizes = [t.size() for t in z]
             self.init_resizer = True
+
         z_ = [ z_.view(n,-1) for z_ in z]
         z_ = torch.cat(z_, dim=1)
         mean  = 0; logs = 0
@@ -112,13 +121,14 @@ class Glow(nn.Module):
         logpz = -0.5*(logs*2. + ((z_- mean)**2)/np.exp(logs*2.) + float(np.log(2 * np.pi))).sum(-1)
         nll   = -(logdet + logpz).mean()
         nll   = nll / float(np.log(2.)*h*w*c)
+        # only nll is useful, the other three are for logging purposes.
         return nll, -logdet.mean().item(),-logpz.mean().item(), z_.mean().item(), z_.std().item()
     
     def preprocess(self, x, clone=False):
         if clone:
             x = x.detach().clone()
         n_bins = 2 ** self.n_bits_x
-        x = torch.floor(x / 2 ** (8 - self.n_bits_x))
+        x = torch.floor(x / 2 ** (8 - self.n_bits_x))  # default: just x
         x = x / n_bins - .5
         x = x + torch.tensor(np.random.uniform(0,1/n_bins,x.size()),dtype=torch.float,device=self.device)
         return x
