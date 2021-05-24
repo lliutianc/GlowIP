@@ -7,7 +7,7 @@ import torch
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='solve denoising')
     # task details: prior, dataset, image size
-    parser.add_argument('-experiment', type=str, help='the name of experiment', default='celeba_denoising_glow_noisestd_0.10')
+    parser.add_argument('-experiment', type=str, help='the name of experiment', default='denoising')
     parser.add_argument('-prior', type=str, help='choose with prior to use glow, dcgan', default='glow')
     parser.add_argument('-dataset', type=str, help='the dataset/images to use', default='celeba')
     parser.add_argument('-size', type=int, help='size of images to resize all images to',
