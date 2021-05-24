@@ -181,6 +181,8 @@ def GlowDenoiser(args):
                 torch.cuda.empty_cache()
             print("\nbatch completed")
 
+            break
+
         if skip_to_next:
             print("\nskipping current loop due to instability or user triggered quit")
             continue
