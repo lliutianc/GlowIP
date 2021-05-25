@@ -90,7 +90,7 @@ def image_noise(unused_loc, scale, **image_prior):
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
             z_unflat = glow.unflatten_z(z, clone=False)
 
-            noise = glow(z_unflat, reveres=True, reverse_clone=False)
+            noise = glow(z_unflat, reverse=True, reverse_clone=False)
             noise = glow.postprocess(noise, floor_clamp=False) * scale
 
             return noise
