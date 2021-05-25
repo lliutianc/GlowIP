@@ -1,6 +1,9 @@
 import numpy as np
 import torch
+
 from measurement.measurement import Measurement
+from glow.glow import Glow
+from dcgan.dcgan import Generator
 
 
 class NoisyMeasurement(Measurement):
@@ -53,3 +56,53 @@ class NoisyMeasurement(Measurement):
 
 def gaussian_noise(loc, scale):
     return lambda size: np.random.normal(size=size, loc=loc, scale=scale)
+
+
+def image_noise(unused_loc, scale, **image_prior):
+    noise = image_prior.get('noise', 'glow')
+    size = image_prior.get('size')
+    configs = image_prior.get('configs')
+    device = image_prior.get('device')
+    dataset = image_prior.get('dataset')
+
+    if noise == 'glow':
+        modeldir = f"./trained_models/{dataset}/glow-cs-{size}"
+
+        glow = Glow((3, size, size),
+                    K=configs["K"], L=configs["L"],
+                    coupling=configs["coupling"],
+                    n_bits_x=configs["n_bits_x"],
+                    nn_init_last_zeros=configs["last_zeros"],
+                    device=device)
+
+        glow.load_state_dict(torch.load(modeldir + "/glowmodel.pt", map_location=device))
+        glow.eval()
+
+        def _image_noise(sample_size):
+            bsz = sample_size[0]
+            z = torch.normal(0, 1, size=(bsz, (size * size * 3)), requires_grad=False)
+            z_unflat = glow.unflatten_z(z, clone=False)
+
+            noise = glow(z_unflat, reveres=True, reverse_clone=False)
+            noise = glow.postprocess(noise, floor_clamp=False) * scale
+
+            return noise
+
+        return _image_noise
+
+    elif noise == 'dcgan':
+        raise NotImplementedError()
+    else:
+        raise NotImplementedError()
+
+
+
+
+
+
+    return
+
+
+    # use glow/gan to generated a face as a noise.
+    # `scale` determines the intensity of the added image.
+    pass

@@ -14,7 +14,8 @@ import traceback
 
 from glow.glow import Glow
 from dcgan.dcgan import Generator
-from measurement.noiser import NoisyMeasurement, gaussian_noise
+from measurement.noiser import NoisyMeasurement
+from measurement.noiser import gaussian_noise, image_noise
 
 
 def solveDenoising(args):
@@ -26,11 +27,15 @@ def solveDenoising(args):
         raise NotImplementedError("prior not defined correctly")
 
 
-def Noiser(args):
-    if args.noise != 'gaussian':
-        raise NotImplementedError
+def Noiser(args, configs):
+    if args.noise == 'gaussian':
+        noise = gaussian_noise(args.noise_loc, args.noise_scale)
+    if args.noise == 'glow':
+        noise = image_noise(args.noise_loc, args.noise_scale,
+                            noise=args.noise, size=args.size,
+                            configs=configs, dataset=args.dataset,
+                            device=args.device)
 
-    noise = gaussian_noise(args.noise_loc, args.noise_scale)
     noiser = NoisyMeasurement(noise, args.noise_channel, args.noise_area, args.device)
 
     return noiser
@@ -57,7 +62,7 @@ def GlowDenoiser(args):
             configs = json.load(f)
 
         # noiser
-        noiser = Noiser(args)
+        noiser = Noiser(args, configs)
 
         # regularizor
         gamma = torch.tensor(gamma, requires_grad=True, dtype=torch.float, device=args.device)
