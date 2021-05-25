@@ -84,7 +84,6 @@ def image_noise(unused_loc, scale, **image_prior):
         _ = glow(glow.preprocess(torch.zeros(size=(bsz, 3, size, size), device=device)))
 
         n = size * size * 3
-
         def _image_noise(sample_size):
             z = np.random.normal(size=(bsz, n))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)

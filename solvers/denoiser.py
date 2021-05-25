@@ -79,8 +79,6 @@ def GlowDenoiser(args):
             n_test = x_test.size()[0]
             assert n_test == args.batchsize, "please make sure that no. of images are evenly divided by batchsize"
 
-            print(x_test.shape)
-
             #
             # if args.noise == "gaussian":
             #     noise = np.random.normal(0, args.noise_std, size=(n_test, 3, args.size,args.size))
@@ -108,8 +106,6 @@ def GlowDenoiser(args):
 
             # making a forward to record shapes of z's for reverse pass
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
-
-            print(x_test.shape)
 
             # initializing z from Gaussian
             if args.init_strategy == "random":
