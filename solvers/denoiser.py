@@ -71,6 +71,7 @@ def GlowDenoiser(args):
         Original  = []
         Recovered = []
         Noisy     = []
+        Noise     = []
         Residual_Curve = []
         for i, data in enumerate(test_dataloader):
             # getting batch of data
@@ -164,6 +165,8 @@ def GlowDenoiser(args):
 
             # getting recovered and true images
             x_test_np  = x_test.data.cpu().numpy().transpose(0,2,3,1)
+            noise_np = noise.data.cpu().numpy().transpose(0, 2, 3, 1)
+
             z_unflat   = glow.unflatten_z(z_sampled, clone=False)
             x_gen      = glow(z_unflat, reverse=True, reverse_clone=False)
             x_gen      = glow.postprocess(x_gen,floor_clamp=False)
@@ -176,6 +179,8 @@ def GlowDenoiser(args):
             Original.append(x_test_np)
             Recovered.append(x_gen_np)
             Noisy.append(x_noisy_np)
+            Noise.append(noise_np)
+
             Residual_Curve.append(residual)
 
             # freeing up memory for second loop
@@ -198,6 +203,8 @@ def GlowDenoiser(args):
         Original  = np.vstack(Original)
         Recovered = np.vstack(Recovered)
         Noisy     = np.vstack(Noisy)
+        Noise     = np.vstack(Noise)
+
         psnr      = [compare_psnr(x, y) for x,y in zip(Original, Recovered)]
 
         # print performance analysis
@@ -247,6 +254,8 @@ def GlowDenoiser(args):
             np.save(save_path+"/original.npy", Original)
             np.save(save_path+"/recovered.npy", Recovered)
             np.save(save_path+"/noisy.npy", Noisy)
+            np.save(save_path+"/noise.npy", Noise)
+
 
 
 def GANDenoiser(args):
