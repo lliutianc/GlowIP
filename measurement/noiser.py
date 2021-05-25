@@ -113,8 +113,8 @@ def image_noise(unused_loc, scale, **image_prior):
 
             return noise * scale
 
+        return _image_noise
 
-        raise NotImplementedError()
     else:
         raise NotImplementedError()
 

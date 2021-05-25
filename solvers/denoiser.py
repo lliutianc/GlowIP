@@ -30,7 +30,7 @@ def solveDenoising(args):
 def Noiser(args, configs):
     if args.noise == 'gaussian':
         noise = gaussian_noise(args.noise_loc, args.noise_scale)
-    if args.noise == 'glow':
+    if args.noise in ['glow', 'dcgan']:
         noise = image_noise(args.noise_loc, args.noise_scale,
                             noise=args.noise, size=args.size, bsz=args.batchsize,
                             configs=configs, dataset=args.dataset,
