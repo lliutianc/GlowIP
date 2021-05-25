@@ -111,7 +111,7 @@ def image_noise(unused_loc, scale, **image_prior):
             # why should we do this?
             noise = (noise + 1) / 2
 
-            return noise
+            return noise * scale
 
 
         raise NotImplementedError()
