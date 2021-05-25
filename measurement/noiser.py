@@ -67,7 +67,6 @@ def image_noise(unused_loc, scale, **image_prior):
     device = image_prior.get('device')
     dataset = image_prior.get('dataset')
 
-    n = size * size * 3
 
     if noise == 'glow':
         modeldir = f"./trained_models/{dataset}/glow-cs-{size}"
@@ -84,6 +83,7 @@ def image_noise(unused_loc, scale, **image_prior):
 
         _ = glow(glow.preprocess(torch.zeros(size=(bsz, 3, size, size), device=device)))
 
+        n = size * size * 3
         def _image_noise(sample_size):
             z = np.random.normal(size=(bsz, n))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
@@ -103,6 +103,7 @@ def image_noise(unused_loc, scale, **image_prior):
         generator.load_state_dict(torch.load(modeldir + '/dcgan_G.pt'))
         generator.eval()
 
+        n = 100
         def _image_noise(sample_size):
             z = np.random.normal(size=(bsz, n, 1, 1))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
