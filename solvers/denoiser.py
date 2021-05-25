@@ -32,7 +32,7 @@ def Noiser(args, configs):
         noise = gaussian_noise(args.noise_loc, args.noise_scale)
     if args.noise == 'glow':
         noise = image_noise(args.noise_loc, args.noise_scale,
-                            noise=args.noise, size=args.size,
+                            noise=args.noise, size=args.size, bsz=args.batchsize,
                             configs=configs, dataset=args.dataset,
                             device=args.device)
 
