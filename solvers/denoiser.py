@@ -186,6 +186,7 @@ def GlowDenoiser(args):
                 torch.cuda.empty_cache()
             print("\nbatch completed")
 
+            # todo: remove this break after finishing development.
             break
 
         if skip_to_next:
