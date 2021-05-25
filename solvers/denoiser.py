@@ -132,9 +132,6 @@ def GlowDenoiser(args):
 
             # running optimizer steps
             for t in range(args.steps):
-                print(x_test)
-                print(noise)
-
                 def closure():
                     optimizer.zero_grad()
                     z_unflat    = glow.unflatten_z(z_sampled, clone=False)
