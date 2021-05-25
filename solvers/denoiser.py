@@ -79,6 +79,8 @@ def GlowDenoiser(args):
             n_test = x_test.size()[0]
             assert n_test == args.batchsize, "please make sure that no. of images are evenly divided by batchsize"
 
+            print(x_test.shape)
+
             #
             # if args.noise == "gaussian":
             #     noise = np.random.normal(0, args.noise_std, size=(n_test, 3, args.size,args.size))
