@@ -82,8 +82,7 @@ def image_noise(unused_loc, scale, **image_prior):
 
         def _image_noise(sample_size):
             bsz = sample_size[0]
-            z = torch.normal(torch.zeros(size=(bsz, n)), torch.ones(size=(bsz, n)),
-                             requires_grad=False)
+            z = torch.normal(torch.zeros(size=(bsz, n)), torch.ones(size=(bsz, n)))
             z_unflat = glow.unflatten_z(z, clone=False)
 
             noise = glow(z_unflat, reveres=True, reverse_clone=False)
