@@ -78,9 +78,13 @@ def image_noise(unused_loc, scale, **image_prior):
         glow.load_state_dict(torch.load(modeldir + "/glowmodel.pt", map_location=device))
         glow.eval()
 
+        n = size * size * 3
+
         def _image_noise(sample_size):
             bsz = sample_size[0]
-            z = torch.normal(0, 1, size=(bsz, size * size * 3), requires_grad=False)
+            print(bsz)
+            print(n)
+            z = torch.normal(0, 1, size=(bsz, n), requires_grad=False)
             z_unflat = glow.unflatten_z(z, clone=False)
 
             noise = glow(z_unflat, reveres=True, reverse_clone=False)
