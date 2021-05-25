@@ -107,6 +107,8 @@ def GlowDenoiser(args):
             # making a forward to record shapes of z's for reverse pass
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
 
+            print(x_test.shape)
+
             # initializing z from Gaussian
             if args.init_strategy == "random":
                 z_sampled = np.random.normal(0, args.init_std, [n_test, n])

@@ -61,9 +61,12 @@ def gaussian_noise(loc, scale):
 def image_noise(unused_loc, scale, **image_prior):
     noise = image_prior.get('noise', 'glow')
     size = image_prior.get('size')
+    bsz = image_prior.get('bsz')
+
     configs = image_prior.get('configs')
     device = image_prior.get('device')
     dataset = image_prior.get('dataset')
+
 
     if noise == 'glow':
         modeldir = f"./trained_models/{dataset}/glow-cs-{size}"
@@ -78,11 +81,13 @@ def image_noise(unused_loc, scale, **image_prior):
         glow.load_state_dict(torch.load(modeldir + "/glowmodel.pt", map_location=device))
         glow.eval()
 
+        _ = glow(glow.preprocess(torch.zeros(size=(bsz, size, size, 3))))
+
         n = size * size * 3
 
         def _image_noise(sample_size):
-            bsz = sample_size[0]
-            z = torch.normal(torch.zeros(size=(bsz, n)), torch.ones(size=(bsz, n)))
+            z = np.random.normal(size=(bsz, n))
+            z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
             z_unflat = glow.unflatten_z(z, clone=False)
 
             noise = glow(z_unflat, reveres=True, reverse_clone=False)
@@ -96,6 +101,8 @@ def image_noise(unused_loc, scale, **image_prior):
         raise NotImplementedError()
     else:
         raise NotImplementedError()
+
+
 
 
 
