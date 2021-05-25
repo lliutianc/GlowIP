@@ -62,7 +62,7 @@ def GlowDenoiser(args):
             configs = json.load(f)
 
         # noiser
-        # noiser = Noiser(args, configs)
+        noiser = Noiser(args, configs)
 
         # regularizor
         gamma = torch.tensor(gamma, requires_grad=True, dtype=torch.float, device=args.device)

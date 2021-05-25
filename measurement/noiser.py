@@ -81,8 +81,8 @@ def image_noise(unused_loc, scale, **image_prior):
         glow.load_state_dict(torch.load(modeldir + "/glowmodel.pt", map_location=device))
         glow.eval()
 
-        _ = glow(glow.preprocess(torch.zeros(size=(bsz, size, size, 3), device=device)))
-        
+        _ = glow(glow.preprocess(torch.zeros(size=(bsz, 3, size, size), device=device)))
+
         n = size * size * 3
 
         def _image_noise(sample_size):
