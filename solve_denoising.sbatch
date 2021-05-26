@@ -14,9 +14,9 @@ module load Conda/3
 conda activate glow
 
 # use glow to add image noise
-python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.8 -noise glow
+#python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.8 -noise glow
 # use dcgan to add image noise
-python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.8 -noise glow
+python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.8 -noise dcgan
 
 # use gaussian to add image noise
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.1 -noise gaussian
