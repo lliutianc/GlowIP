@@ -43,6 +43,8 @@ def Noiser(args, configs):
 
 def GlowDenoiser(args):
     loopOver = zip(args.gamma)
+
+    # try different gamma values
     for gamma in loopOver:
         skip_to_next  = False # flag to skip to next loop if recovery is fails due to instability
         n             = args.size*args.size*3
@@ -237,7 +239,7 @@ def GlowDenoiser(args):
 
             save_path = os.path.join(save_path, f'{args.noise}_'
                                                 f'{args.noise_loc}#{args.noise_scale}_'
-                                                f'{args.noise_channel}_{args.noise_area}_{args.gamma}')
+                                                f'{args.noise_channel}_{args.noise_area}_{gamma}')
 
             # save_path = save_path + "/denoising_noisestd_" \
             #                         "%0.4f_gamma_%0.6f_steps_%d_lr_%0.3f_init_std_%0.2f_optim_%s"
