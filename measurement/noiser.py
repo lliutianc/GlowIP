@@ -84,11 +84,11 @@ def image_noise(unused_loc, scale, **image_prior):
         _ = glow(glow.preprocess(torch.zeros(size=(bsz, 3, size, size), device=device)))
 
         n = size * size * 3
-        def _image_noise(sample_size):
+        def _image_noise(unused_sample_size):
             z = np.random.normal(size=(bsz, n))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
-            z_unflat = glow.unflatten_z(z, clone=False)
 
+            z_unflat = glow.unflatten_z(z, clone=False)
             noise = glow(z_unflat, reverse=True, reverse_clone=False)
             noise = glow.postprocess(noise, floor_clamp=False) * scale
 
@@ -104,12 +104,12 @@ def image_noise(unused_loc, scale, **image_prior):
         generator.eval()
 
         n = 100
-        def _image_noise(sample_size):
+        def _image_noise(unused_sample_size):
             z = np.random.normal(size=(bsz, n, 1, 1))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
 
             noise = generator(z)
-            # why should we do this?
+            # todo: why?
             noise = (noise + 1) / 2
 
             return noise * scale
@@ -120,15 +120,5 @@ def image_noise(unused_loc, scale, **image_prior):
         raise NotImplementedError()
 
 
-
-
-
-
-
-
-    return
-
-
-    # use glow/gan to generated a face as a noise.
-    # `scale` determines the intensity of the added image.
-    pass
+if __name__ == '__main__':
+    from solve_denoising import args
