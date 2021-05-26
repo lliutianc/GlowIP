@@ -1,8 +1,9 @@
 #!/bin/bash
 
 #SBATCH --job-name=solve_denosing
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:k80:1
 #SBATCH --mem-per-cpu=8G
+#SBATCH --mail-type=END
 
 #SBATCH --time=5:00:00
 #SBATCH --output=%x-%j.SLURM
