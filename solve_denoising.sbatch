@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=train_glow
+#SBATCH --job-name=solve_denosing
 #SBATCH --gres=gpu:1
 #SBATCH --mem-per-cpu=8G
 
