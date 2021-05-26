@@ -43,4 +43,4 @@ if __name__ == "__main__":
     solveDenoising(args)
 
 
-# python solve_denoising.py -prior glow -experiment denoise -dataset celeba -gamma 0.75 -batchsize 1
+# python solve_denoising.py -prior glow -experiment denoise -dataset celeba -gamma 0.0125 -batchsize 4 -noise glow
