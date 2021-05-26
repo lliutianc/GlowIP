@@ -138,11 +138,11 @@ def GlowDenoiser(args):
                     z_unflat    = glow.unflatten_z(z_sampled, clone=False)
                     x_gen       = glow(z_unflat, reverse=True, reverse_clone=False)
                     x_gen       = glow.postprocess(x_gen,floor_clamp=False)
-                    x_noisy     = x_test + noise
-                    print(x_noisy)
+                    # x_noisy = x_test + noise
+
+                    # use the weighted sum to generate noise image
+                    x_noisy     = x_test * (1 - args.noise_scale) + noise
                     x_noisy = torch.clamp(x_noisy, 0., 1.)
-                    print(x_noisy)
-                    exit(0)
                     global residual_t
                     residual_t  = ((x_gen - x_noisy)**2).view(len(x_noisy),-1).sum(dim=1).mean()
                     if not args.z_penalty_unsquared:
@@ -169,6 +169,7 @@ def GlowDenoiser(args):
 
             # getting recovered and true images
             x_test_np  = x_test.data.cpu().numpy().transpose(0, 2, 3, 1)
+
             noise_np = noise.data.cpu().numpy().transpose(0, 2, 3, 1)
             noise_np = np.clip(noise_np, 0, 1)
 
@@ -177,7 +178,10 @@ def GlowDenoiser(args):
             x_gen      = glow.postprocess(x_gen,floor_clamp=False)
             x_gen_np   = x_gen.data.cpu().numpy().transpose(0,2,3,1)
             x_gen_np   = np.clip(x_gen_np,0,1)
-            x_noisy    = x_test + noise
+
+            # x_noisy    = x_test + noise
+            # weighted sum
+            x_noisy = x_test * (1 - args.noise_scale) + noise
             x_noisy_np = x_noisy.data.cpu().numpy().transpose(0,2,3,1)
             x_noisy_np = np.clip(x_noisy_np,0,1)
 
