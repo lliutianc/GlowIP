@@ -6,7 +6,7 @@
 #SBATCH --mail-type=END
 
 #SBATCH --time=5:00:00
-#SBATCH --output=%x-%j.SLURM
+#SBATCH --output=~/logs/%x-%j.SLURM
 
 echo $CUDA_VISIBLE_DEVICES
 
