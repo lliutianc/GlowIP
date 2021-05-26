@@ -133,27 +133,26 @@ def GlowDenoiser(args):
             psnr_t    = torch.nn.MSELoss().to(device=args.device)
             residual  = []
 
+            x_noisy = x_test + noise
+            # x_noisy     = x_test * (1 - args.noise_scale) + noise  # use weighted sum
+            x_noisy = torch.clamp(x_noisy, 0., 1.)
+
             # running optimizer steps
             for t in range(args.steps):
                 def closure():
                     optimizer.zero_grad()
-                    z_unflat    = glow.unflatten_z(z_sampled, clone=False)
-                    x_gen       = glow(z_unflat, reverse=True, reverse_clone=False)
-                    x_gen       = glow.postprocess(x_gen,floor_clamp=False)
-                    # x_noisy = x_test + noise
-
-                    # use the weighted sum to generate noise image
-                    x_noisy     = x_test * (1 - args.noise_scale) + noise
-                    x_noisy = torch.clamp(x_noisy, 0., 1.)
+                    z_unflat = glow.unflatten_z(z_sampled, clone=False)
+                    x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+                    x_gen = glow.postprocess(x_gen,floor_clamp=False)
                     global residual_t
                     residual_t  = ((x_gen - x_noisy)**2).view(len(x_noisy),-1).sum(dim=1).mean()
                     if not args.z_penalty_unsquared:
                         z_reg_loss_t= gamma*(z_sampled.norm(dim=1)**2).mean()
                     else:
                         z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
-                    loss_t      = residual_t + z_reg_loss_t
-                    psnr        = psnr_t(x_test, x_gen)
-                    psnr        = 10 * np.log10(1 / psnr.item())
+                    loss_t = residual_t + z_reg_loss_t
+                    psnr = psnr_t(x_test, x_gen)
+                    psnr = 10 * np.log10(1 / psnr.item())
                     print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
                     loss_t.backward(retain_graph=True)
                     return loss_t
@@ -170,20 +169,19 @@ def GlowDenoiser(args):
                 break
 
             # getting recovered and true images
-            x_test_np  = x_test.data.cpu().numpy().transpose(0, 2, 3, 1)
+            x_test_np = x_test.data.cpu().numpy().transpose(0, 2, 3, 1)
 
             noise_np = noise.data.cpu().numpy().transpose(0, 2, 3, 1)
             noise_np = np.clip(noise_np, 0, 1)
 
-            z_unflat   = glow.unflatten_z(z_sampled, clone=False)
-            x_gen      = glow(z_unflat, reverse=True, reverse_clone=False)
-            x_gen      = glow.postprocess(x_gen,floor_clamp=False)
-            x_gen_np   = x_gen.data.cpu().numpy().transpose(0,2,3,1)
-            x_gen_np   = np.clip(x_gen_np,0,1)
+            z_unflat = glow.unflatten_z(z_sampled, clone=False)
+            x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+            x_gen = glow.postprocess(x_gen,floor_clamp=False)
+            x_gen_np = x_gen.data.cpu().numpy().transpose(0,2,3,1)
+            x_gen_np = np.clip(x_gen_np,0,1)
 
-            # x_noisy    = x_test + noise
-            # weighted sum
-            x_noisy = x_test * (1 - args.noise_scale) + noise
+            x_noisy    = x_test + noise
+            # x_noisy = x_test * (1 - args.noise_scale) + noise  # weighted sum
             x_noisy_np = x_noisy.data.cpu().numpy().transpose(0,2,3,1)
             x_noisy_np = np.clip(x_noisy_np,0,1)
 
