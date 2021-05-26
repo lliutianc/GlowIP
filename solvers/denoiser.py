@@ -140,7 +140,7 @@ def GlowDenoiser(args):
                     x_gen       = glow.postprocess(x_gen,floor_clamp=False)
                     x_noisy     = x_test + noise
                     print(x_noisy)
-                    x_noisy = torch.clip(x_noisy, 0., 1.)
+                    x_noisy = torch.clamp(x_noisy, 0., 1.)
                     print(x_noisy)
                     exit(0)
                     global residual_t
@@ -233,7 +233,7 @@ def GlowDenoiser(args):
 
             save_path = os.path.join(save_path, f'{args.noise}_'
                                                 f'{args.noise_loc}#{args.noise_scale}_'
-                                                f'{args.noise_channel}_{args.noise_area}')
+                                                f'{args.noise_channel}_{args.noise_area}_{args.gamma}')
 
             # save_path = save_path + "/denoising_noisestd_" \
             #                         "%0.4f_gamma_%0.6f_steps_%d_lr_%0.3f_init_std_%0.2f_optim_%s"
@@ -260,7 +260,6 @@ def GlowDenoiser(args):
             np.save(save_path+"/recovered.npy", Recovered)
             np.save(save_path+"/noisy.npy", Noisy)
             np.save(save_path+"/noise.npy", Noise)
-
 
 
 def GANDenoiser(args):
