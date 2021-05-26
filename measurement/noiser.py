@@ -90,7 +90,7 @@ def image_noise(unused_loc, scale, **image_prior):
 
             z_unflat = glow.unflatten_z(z, clone=False)
             noise = glow(z_unflat, reverse=True, reverse_clone=False)
-            noise = glow.postprocess(noise, floor_clamp=False) * scale
+            noise = glow.postprocess(noise, floor_clamp=True) * scale
 
             return noise
 
@@ -119,6 +119,3 @@ def image_noise(unused_loc, scale, **image_prior):
     else:
         raise NotImplementedError()
 
-
-if __name__ == '__main__':
-    from solve_denoising import args
