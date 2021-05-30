@@ -20,7 +20,8 @@ if __name__ == "__main__":
     parser.add_argument('-noise_area', type=int, help='the area of noise to add', default=None)
 
     # training
-    parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1])
+    parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0.0125])
+    # parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1])
     # parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10, 20, 30, 40, 50])
     parser.add_argument('-optim', type=str, help='optimizer', default="lbfgs")
     parser.add_argument('-z_penalty_unsquared', action="store_true", help="use ||z|| if True else ||z||^2")
@@ -37,6 +38,7 @@ if __name__ == "__main__":
     parser.add_argument('-save_results', type=bool, help='whether to save results after experiments conclude', default=True)
     parser.add_argument('-cuda', type=int, help='which gpu to use', default=6)
     parser.add_argument('-dev', action='store_true', default=False)
+    parser.add_argument('-random_seed', type=int, default=2021)
 
     args = parser.parse_args()
     if args.dev:
