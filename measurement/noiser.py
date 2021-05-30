@@ -54,7 +54,14 @@ class NoisyMeasurement(Measurement):
         return noise
 
 
+def poisson_noise(loc):
+    np.random.seed(1)
+    #todo
+    pass
+
+
 def gaussian_noise(loc, scale):
+    np.random.seed(1)
     return lambda size: np.random.normal(size=size, loc=loc, scale=scale)
 
 
@@ -66,7 +73,6 @@ def image_noise(unused_loc, scale, **image_prior):
     configs = image_prior.get('configs')
     device = image_prior.get('device')
     dataset = image_prior.get('dataset')
-
 
     if noise == 'glow':
         modeldir = f"./trained_models/{dataset}/glow-cs-{size}"
@@ -84,7 +90,10 @@ def image_noise(unused_loc, scale, **image_prior):
         _ = glow(glow.preprocess(torch.zeros(size=(bsz, 3, size, size), device=device)))
 
         n = size * size * 3
+
         def _image_noise(unused_sample_size):
+            np.random.noise(1)
+
             z = np.random.normal(size=(bsz, n))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
 
@@ -104,7 +113,10 @@ def image_noise(unused_loc, scale, **image_prior):
         generator.eval()
 
         n = 100
+
         def _image_noise(unused_sample_size):
+            np.random.noise(1)
+
             z = np.random.normal(size=(bsz, n, 1, 1))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
 
@@ -118,4 +130,3 @@ def image_noise(unused_loc, scale, **image_prior):
 
     else:
         raise NotImplementedError()
-

@@ -107,9 +107,14 @@ def GlowDenoiser(args):
             # noise to add
             noise = noiser(x_test)
 
+            # todo: remove these debug lines.
+            print(noise)
+            exit(1)
+
             # making a forward to record shapes of z's for reverse pass
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
 
+            np.random.seed(args.random_seed)
             # initializing z from Gaussian
             if args.init_strategy == "random":
                 z_sampled = np.random.normal(0, args.init_std, [n_test, n])
