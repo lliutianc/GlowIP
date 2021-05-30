@@ -92,7 +92,7 @@ def image_noise(unused_loc, scale, **image_prior):
         n = size * size * 3
 
         def _image_noise(unused_sample_size):
-            np.random.noise(1)
+            np.random.seed(1)
 
             z = np.random.normal(size=(bsz, n))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
@@ -115,7 +115,7 @@ def image_noise(unused_loc, scale, **image_prior):
         n = 100
 
         def _image_noise(unused_sample_size):
-            np.random.noise(1)
+            np.random.seed(1)
 
             z = np.random.normal(size=(bsz, n, 1, 1))
             z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
