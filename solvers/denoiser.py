@@ -1,5 +1,7 @@
 import numpy as np
 import torch
+import torch.nn as nn
+
 from torchvision import datasets
 import torchvision.transforms as transforms
 from skimage.measure import compare_psnr, compare_ssim
@@ -114,15 +116,17 @@ def GlowDenoiser(args):
             # initializing z from Gaussian
             if args.init_strategy == "random":
                 z_sampled = np.random.normal(0, args.init_std, [n_test, n])
-                z_sampled = torch.tensor(z_sampled, requires_grad=True, dtype=torch.float, device=args.device)
             # initializing z from noisy image
             elif args.init_strategy == "from-noisy":
                 x_noisy     = x_test + noise
                 z, _, _     = glow(glow.preprocess(x_noisy*255,clone=True))
                 z           = glow.flatten_z(z)
-                z_sampled   = z.clone().detach().requires_grad_(True)
+                z_sampled   = z.clone().detach().cpu().numpy()
             else:
                 raise NotImplementedError("Initialization strategy not defined")
+
+            z_sampled = torch.from_numpy(z_sampled).float().to(args.device)
+            z_sampled = nn.Parameter(z_sampled, requires_grad=True)
 
             # selecting optimizer
             if args.optim == "adam":
@@ -131,11 +135,10 @@ def GlowDenoiser(args):
                 optimizer = torch.optim.LBFGS([z_sampled], lr=args.lr,)
 
             # to be recorded over iteration
-            psnr_t    = torch.nn.MSELoss().to(device=args.device)
+            # psnr_t    = torch.nn.MSELoss().to(device=args.device)
             residual  = []
 
             x_noisy = x_test + noise
-            # x_noisy     = x_test * (1 - args.noise_scale) + noise  # use weighted sum
             x_noisy = torch.clamp(x_noisy, 0., 1.)
 
             # running optimizer steps
@@ -172,6 +175,7 @@ def GlowDenoiser(args):
                         z_reg_loss_t = gamma * z_sampled.norm(dim=1).mean()
                     loss_t = residual_t + z_reg_loss_t
                     loss_t.backward()
+
                     optimizer.step()
                     psnr = torch.mean((x_test - x_gen) ** 2)
                     psnr = 10 * np.log10(1 / psnr.item())
