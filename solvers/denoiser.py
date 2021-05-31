@@ -173,7 +173,7 @@ def GlowDenoiser(args):
                     loss_t = residual_t + z_reg_loss_t
                     loss_t.backward()
                     optimizer.step()
-                    psnr = torch.square(x_test - x_gen).mean()
+                    psnr = torch.mean((x_test - x_gen) ** 2)
                     psnr = 10 * np.log10(1 / psnr.item())
                     print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
 
