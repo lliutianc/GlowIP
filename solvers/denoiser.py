@@ -135,7 +135,7 @@ def GlowDenoiser(args):
                 optimizer = torch.optim.LBFGS([z_sampled], lr=args.lr,)
 
             # to be recorded over iteration
-            # psnr_t    = torch.nn.MSELoss().to(device=args.device)
+            psnr_t    = torch.nn.MSELoss().to(device=args.device)
             residual  = []
 
             x_noisy = x_test + noise
@@ -144,43 +144,24 @@ def GlowDenoiser(args):
             # running optimizer steps
             for t in range(args.steps):
                 try:
-                    # def closure():
-                    #     optimizer.zero_grad()
-                    #     z_unflat = glow.unflatten_z(z_sampled, clone=False)
-                    #     x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
-                    #     x_gen = glow.postprocess(x_gen,floor_clamp=False)
-                    #     global residual_t
-                    #     residual_t  = ((x_gen - x_noisy)**2).view(len(x_noisy),-1).sum(dim=1).mean()
-                    #     if not args.z_penalty_unsquared:
-                    #         z_reg_loss_t= gamma*(z_sampled.norm(dim=1)**2).mean()
-                    #     else:
-                    #         z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
-                    #     loss_t = residual_t + z_reg_loss_t
-                    #     psnr = psnr_t(x_test, x_gen)
-                    #     psnr = 10 * np.log10(1 / psnr.item())
-                    #     print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
-                    #     loss_t.backward(retain_graph=False)
-                    #     return loss_t
-                    # optimizer.step(closure)
-
-                    optimizer.zero_grad()
-                    z_unflat = glow.unflatten_z(z_sampled, clone=False)
-                    x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
-                    x_gen = glow.postprocess(x_gen, floor_clamp=False)
-
-                    residual_t = ((x_gen - x_noisy) ** 2).view(len(x_noisy), -1).sum(dim=1).mean()
-                    if not args.z_penalty_unsquared:
-                        z_reg_loss_t = gamma * (z_sampled.norm(dim=1) ** 2).mean()
-                    else:
-                        z_reg_loss_t = gamma * z_sampled.norm(dim=1).mean()
-                    loss_t = residual_t + z_reg_loss_t
-                    loss_t.backward(retain_graph=True)
-
-                    optimizer.step()
-                    psnr = torch.mean((x_test - x_gen) ** 2)
-                    psnr = 10 * np.log10(1 / psnr.item())
-                    print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
-
+                    def closure():
+                        optimizer.zero_grad()
+                        z_unflat = glow.unflatten_z(z_sampled, clone=False)
+                        x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+                        x_gen = glow.postprocess(x_gen,floor_clamp=False)
+                        global residual_t
+                        residual_t  = ((x_gen - x_noisy)**2).view(len(x_noisy),-1).sum(dim=1).mean()
+                        if not args.z_penalty_unsquared:
+                            z_reg_loss_t= gamma*(z_sampled.norm(dim=1)**2).mean()
+                        else:
+                            z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
+                        loss_t = residual_t + z_reg_loss_t
+                        psnr = psnr_t(x_test, x_gen)
+                        psnr = 10 * np.log10(1 / psnr.item())
+                        print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
+                        loss_t.backward(retain_graph=True)
+                        return loss_t
+                    optimizer.step(closure)
                     residual.append(residual_t.item())
                 except Exception as e:
                     traceback.print_exc()
