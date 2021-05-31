@@ -48,8 +48,8 @@ def GlowDenoiser(args):
     for gamma in loopOver:
         skip_to_next  = False # flag to skip to next loop if recovery is fails due to instability
         n             = args.size*args.size*3
-        modeldir      = f"./trained_models/{args.dataset}/glow-denoising"
-        # modeldir      = f"./trained_models/{args.dataset}/glow-cs-{args.size}"
+        # modeldir      = f"./trained_models/{args.dataset}/glow-denoising"
+        modeldir      = f"./trained_models/{args.dataset}/glow-cs-{args.size}"
         test_folder   = f"./test_images/{args.dataset}_N=12"
         save_path     = f"./results/{args.dataset}/{args.experiment}"
 
@@ -182,7 +182,6 @@ def GlowDenoiser(args):
             x_gen_np = np.clip(x_gen_np,0,1)
 
             x_noisy    = x_test + noise
-            # x_noisy = x_test * (1 - args.noise_scale) + noise  # weighted sum
             x_noisy_np = x_noisy.data.cpu().numpy().transpose(0,2,3,1)
             x_noisy_np = np.clip(x_noisy_np,0,1)
 
