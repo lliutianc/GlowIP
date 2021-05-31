@@ -174,6 +174,7 @@ def GlowDenoiser(args):
                     else:
                         z_reg_loss_t = gamma * z_sampled.norm(dim=1).mean()
                     loss_t = residual_t + z_reg_loss_t
+                    print(t)
                     loss_t.backward()
 
                     optimizer.step()
