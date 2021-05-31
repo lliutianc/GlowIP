@@ -21,6 +21,6 @@ conda activate glow
 
 # use gaussian to add image noise
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.1 -noise gaussian
-python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.2 -noise gaussian -size 128
+python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.2 -noise gaussian -size 128 -optim adam
 
 
