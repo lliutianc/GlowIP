@@ -56,7 +56,7 @@ class NoisyMeasurement(Measurement):
 
 def poisson_noise(loc):
     np.random.seed(1)
-    #todo
+    #todo: add poisson noise
     pass
 
 
