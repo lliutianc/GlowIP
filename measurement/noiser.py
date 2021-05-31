@@ -94,12 +94,11 @@ def image_noise(unused_loc, scale, **image_prior):
         def _image_noise(unused_sample_size):
             np.random.seed(1)
 
-            z = np.random.normal(size=(bsz, n))
-            z = torch.tensor(z, dtype=torch.float, requires_grad=False, device=device)
-
-            z_unflat = glow.unflatten_z(z, clone=False)
-            noise = glow(z_unflat, reverse=True, reverse_clone=False)
-            noise = glow.postprocess(noise, floor_clamp=True) * scale
+            _, z = glow.generate_z(n=bsz, mu=0, std=0.5, to_torch=True)
+            noise = glow.postprocess(glow.forward(z, reverse=True)) * scale
+            print(z)
+            print(noise)
+            exit(1)
 
             return noise
 
