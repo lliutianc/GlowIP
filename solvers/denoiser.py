@@ -174,8 +174,7 @@ def GlowDenoiser(args):
                     else:
                         z_reg_loss_t = gamma * z_sampled.norm(dim=1).mean()
                     loss_t = residual_t + z_reg_loss_t
-                    print(t)
-                    loss_t.backward()
+                    loss_t.backward(retain_graph=True)
 
                     optimizer.step()
                     psnr = torch.mean((x_test - x_gen) ** 2)
