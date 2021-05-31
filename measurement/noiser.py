@@ -93,7 +93,7 @@ def image_noise(unused_loc, scale, **image_prior):
 
         def _image_noise(unused_sample_size):
             np.random.seed(1)
-            torch.random.seed(1)
+            torch.seed(1)
 
             _, z = glow.generate_z(n=bsz, mu=0, std=0.5, to_torch=True)
             noise = glow.postprocess(glow.forward(z, reverse=True)) * scale
