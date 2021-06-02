@@ -203,22 +203,25 @@ def GlowDenoiser(args):
             noise_np = noise.data.cpu().numpy().transpose(0, 2, 3, 1)
             noise_np = np.clip(noise_np, 0, 1)
 
-            z_unflat = glow.unflatten_z(z_sampled, clone=False)
-            x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
-            x_gen = glow.postprocess(x_gen,floor_clamp=False)
-            x_gen_np = x_gen.data.cpu().numpy().transpose(0,2,3,1)
-            x_gen_np = np.clip(x_gen_np,0,1)
-
             x_noisy    = x_test + noise
             x_noisy_np = x_noisy.data.cpu().numpy().transpose(0,2,3,1)
-            x_noisy_np = np.clip(x_noisy_np,0,1)
+            x_noisy_np = np.clip(x_noisy_np, 0, 1)
 
             Original.append(x_test_np)
-            Recovered.append(x_gen_np)
             Noisy.append(x_noisy_np)
             Noise.append(noise_np)
 
             Residual_Curve.append(residual)
+
+            try:
+                z_unflat = glow.unflatten_z(z_sampled, clone=False)
+                x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+                x_gen = glow.postprocess(x_gen,floor_clamp=False)
+                x_gen_np = x_gen.data.cpu().numpy().transpose(0,2,3,1)
+                x_gen_np = np.clip(x_gen_np,0,1)
+                Recovered.append(x_gen_np)
+            except Exception as e:
+                traceback.print_exc()
 
             # freeing up memory for second loop
             glow.zero_grad()
@@ -242,7 +245,11 @@ def GlowDenoiser(args):
         Noisy     = np.vstack(Noisy)
         Noise     = np.vstack(Noise)
 
-        psnr      = [compare_psnr(x, y) for x,y in zip(Original, Recovered)]
+        psnr = None
+        try:
+            psnr = [compare_psnr(x, y) for x,y in zip(Original, Recovered)]
+        except Exception as e:
+            traceback.print_exc()
 
         # print performance analysis
 
@@ -250,7 +257,8 @@ def GlowDenoiser(args):
         printout = printout + "\t n_test     = %d\n"%len(Recovered)
         printout = printout + "\t noise_std  = %0.4f\n"%args.noise_scale
         printout = printout + "\t gamma      = %0.6f\n"%gamma
-        printout = printout + "\t PSNR       = %0.3f\n"%np.mean(psnr)
+        if psnr is not None:
+            printout = printout + "\t PSNR       = %0.3f\n"%np.mean(psnr)
         print(printout)
 
         if args.save_metrics_text:
@@ -269,7 +277,7 @@ def GlowDenoiser(args):
                                                 f'{args.init_strategy}_'
                                                 f'{round(gamma, 4)}_{gettime()}')
             print(save_path)
-            
+
             # save_path = save_path + "/denoising_noisestd_" \
             #                         "%0.4f_gamma_%0.6f_steps_%d_lr_%0.3f_init_std_%0.2f_optim_%s"
             # save_path = save_path%(args.noise_std, gamma, args.steps,
