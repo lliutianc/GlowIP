@@ -17,7 +17,7 @@ import traceback
 from glow.glow import Glow
 from dcgan.dcgan import Generator
 from measurement.noiser import NoisyMeasurement
-from measurement.noiser import gaussian_noise, gamma_noise, image_noise
+from measurement.noiser import gaussian_noise, gamma_noise, loggamma_noise, image_noise
 from utils import gettime
 
 
@@ -35,7 +35,11 @@ def Noiser(args, configs):
         noise = gaussian_noise(args.noise_loc, args.noise_scale)
 
     if args.noise == 'gamma':
+        raise NotImplementedError('Don\'t know how to handle gamma noise yet')
         noise = gamma_noise(args.noise_loc, args.noise_scale)
+
+    if args.noise == 'gamma':
+        noise = loggamma_noise(args.noise_loc, args.noise_scale)
 
     if args.noise in ['glow', 'dcgan']:
         noise = image_noise(args.noise_loc, args.noise_scale,
@@ -56,10 +60,10 @@ def recon_loss(noise, loc, scale):
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
         return _recon
 
-    elif noise == 'gamma':
+    elif noise == 'loggamma':
         def _recon(x_gen, x_noisy):
             delta = x_gen - x_noisy
-            delta = torch.abs(delta)
+            delta = torch.exp(delta)
             nll = scale * delta - (loc - 1) * torch.log(delta)
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
         return _recon
