@@ -60,6 +60,11 @@ def poisson_noise(loc):
     pass
 
 
+def gamma_noise(loc, scale):
+    np.random.seed(1)
+    return lambda size: np.random.gamma(size=size, shape=loc, scale=scale)
+
+
 def gaussian_noise(loc, scale):
     np.random.seed(1)
     return lambda size: np.random.normal(size=size, loc=loc, scale=scale)
