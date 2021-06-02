@@ -59,6 +59,7 @@ def recon_loss(noise, loc, scale):
     elif noise == 'gamma':
         def _recon(x_gen, x_noisy):
             delta = x_gen - x_noisy
+            delta = torch.abs(delta)
             nll = scale * delta - (loc - 1) * torch.log(delta)
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
         return _recon
@@ -192,7 +193,7 @@ def GlowDenoiser(args):
                     traceback.print_exc()
                     skip_to_next = True
                     break
-
+            #
             # if skip_to_next:
             #     break
 
@@ -230,9 +231,9 @@ def GlowDenoiser(args):
             # todo: remove this break after finishing development.
             break
 
-        if skip_to_next:
-            print("\nskipping current loop due to instability or user triggered quit")
-            continue
+        # if skip_to_next:
+        #     print("\nskipping current loop due to instability or user triggered quit")
+        #     continue
 
         # metric evaluations
 
@@ -267,7 +268,8 @@ def GlowDenoiser(args):
                                                 f'{args.noise_channel}_{args.noise_area}_'
                                                 f'{args.init_strategy}_'
                                                 f'{round(gamma, 4)}_{gettime()}')
-
+            print(save_path)
+            
             # save_path = save_path + "/denoising_noisestd_" \
             #                         "%0.4f_gamma_%0.6f_steps_%d_lr_%0.3f_init_std_%0.2f_optim_%s"
             # save_path = save_path%(args.noise_std, gamma, args.steps,
