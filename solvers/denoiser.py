@@ -209,10 +209,11 @@ def GlowDenoiser(args):
 
             Residual_Curve.append(residual)
 
+            x_gen = None
             try:
                 z_unflat = glow.unflatten_z(z_sampled, clone=False)
                 x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
-                x_gen = glow.postprocess(x_gen,floor_clamp=False)
+                x_gen = glow.postprocess(x_gen, floor_clamp=False)
 
                 x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
                 x_gen_np = np.clip(x_gen_np, 0, 1)
@@ -223,7 +224,7 @@ def GlowDenoiser(args):
             # freeing up memory for second loop
             glow.zero_grad()
             optimizer.zero_grad()
-            del x_test, x_gen, optimizer, psnr_t, z_sampled, glow, noise,
+            del x_test, x_gen, optimizer, psnr_t, z_sampled, glow, noise
             with torch.cuda.device(args.device):
                 torch.cuda.empty_cache()
             print("\nbatch completed")

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument('-optim', type=str, help='optimizer', default="lbfgs")
     parser.add_argument('-z_penalty_unsquared', action="store_true", help="use ||z|| if True else ||z||^2")
     parser.add_argument('-lr', type=float, help='learning rate', default=1)
-    parser.add_argument('-steps', type=int, help='no. of steps to run', default=20)
+    parser.add_argument('- ', type=int, help='no. of steps to run', default=20)
     parser.add_argument('-batchsize', type=int, help='no. of images to solve in parallel as batches', default=6)
 
     # trainable parameters
