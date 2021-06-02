@@ -242,6 +242,7 @@ def GlowDenoiser(args):
             save_path = os.path.join(save_path, f'{args.noise}_'
                                                 f'{args.noise_loc}#{args.noise_scale}_'
                                                 f'{args.noise_channel}_{args.noise_area}_'
+                                                f'{args.init_strategy}_'
                                                 f'{round(gamma, 4)}_{gettime()}')
 
             # save_path = save_path + "/denoising_noisestd_" \
