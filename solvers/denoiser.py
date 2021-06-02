@@ -36,9 +36,9 @@ def Noiser(args, configs):
 
     if args.noise == 'gamma':
         raise NotImplementedError('Don\'t know how to handle gamma noise yet')
-        noise = gamma_noise(args.noise_loc, args.noise_scale)
+        # noise = gamma_noise(args.noise_loc, args.noise_scale)
 
-    if args.noise == 'gamma':
+    if args.noise == 'loggamma':
         noise = loggamma_noise(args.noise_loc, args.noise_scale)
 
     if args.noise in ['glow', 'dcgan']:
