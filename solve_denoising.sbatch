@@ -16,11 +16,17 @@ conda activate glow
 
 # use glow to add image noise
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.8 -noise glow
-# use dcgan to add image noise
+
+# dcgan noise
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.8 -noise dcgan
 
-# use gaussian to add image noise
-python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.1 -noise gaussian
-#python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.2 -noise gaussian -size 128 -optim adam
+# gaussian noise
+#python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.1 -noise gaussian
+
+# log gamma noise
+python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 5. -noise_loc 1. -noise loggamma
+
+# gamma noise: can noisy-init help?
+python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 5. -noise_loc 1. -noise gamma -init_strategy from-noisy
 
 
