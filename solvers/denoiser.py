@@ -110,25 +110,15 @@ def GlowDenoiser(args):
         Noise     = []
         Residual_Curve = []
         for i, data in enumerate(test_dataloader):
-            # getting batch of data
+
             x_test = data[0]
             x_test = x_test.clone().to(device=args.device)
             n_test = x_test.size()[0]
-            assert n_test == args.batchsize, "please make sure that no. of images are evenly divided by batchsize"
-
-            #
-            # if args.noise == "gaussian":
-            #     noise = np.random.normal(0, args.noise_std, size=(n_test, 3, args.size,args.size))
-            #     noise = torch.tensor(noise,dtype=torch.float,requires_grad=False, device=args.device)
-            # elif args.noise == "laplacian":
-            #     noise = np.random.laplace(scale=args.noise_std, size=(n_test,3,args.size,args.size))
-            #     noise = torch.tensor(noise,dtype=torch.float,requires_grad=False, device=args.device)
-            #     raise "code only supports gaussian for now" #-> no noise type tag in the folder name
-            # else:
-            #     raise "noise type not defined"
-            #
+            assert n_test == args.batchsize, \
+                "please make sure that no. of images are evenly divided by batchsize"
 
             # loading glow model
+
             glow = Glow((3,args.size,args.size),
                         K=configs["K"],L=configs["L"],
                         coupling=configs["coupling"],
@@ -144,13 +134,12 @@ def GlowDenoiser(args):
             x_noisy = torch.clamp(x_noisy, 0., 1.)
 
             # making a forward to record shapes of z's for reverse pass
+
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
 
             np.random.seed(args.random_seed)
-            # initializing z from Gaussian
             if args.init_strategy == "random":
                 z_sampled = np.random.normal(0, args.init_std, [n_test, n])
-            # initializing z from noisy image
             elif args.init_strategy == "from-noisy":
                 z, _, _     = glow(glow.preprocess(x_noisy*255,clone=True))
                 z           = glow.flatten_z(z)
@@ -162,16 +151,19 @@ def GlowDenoiser(args):
             z_sampled = nn.Parameter(z_sampled, requires_grad=True)
 
             # selecting optimizer
+
             if args.optim == "adam":
                 optimizer = torch.optim.Adam([z_sampled], lr=args.lr,)
             elif args.optim == "lbfgs":
                 optimizer = torch.optim.LBFGS([z_sampled], lr=args.lr,)
 
             # to be recorded over iteration
+
             psnr_t    = torch.nn.MSELoss().to(device=args.device)
             residual  = []
 
             # running optimizer steps
+
             for t in range(args.steps):
                 try:
                     def closure():
@@ -188,7 +180,9 @@ def GlowDenoiser(args):
                         loss_t = residual_t + z_reg_loss_t
                         psnr = psnr_t(x_test, x_gen)
                         psnr = 10 * np.log10(1 / psnr.item())
-                        print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(t,loss_t.item(),residual_t.item(),z_reg_loss_t.item(), psnr),end="\r")
+                        print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(
+                            t, loss_t.item(), residual_t.item(), z_reg_loss_t.item(), psnr),
+                              end="\r")
                         loss_t.backward(retain_graph=True)
                         return loss_t
                     optimizer.step(closure)
@@ -197,7 +191,7 @@ def GlowDenoiser(args):
                     traceback.print_exc()
                     skip_to_next = True
                     break
-            #
+
             # if skip_to_next:
             #     break
 
@@ -207,7 +201,7 @@ def GlowDenoiser(args):
             noise_np = noise.data.cpu().numpy().transpose(0, 2, 3, 1)
             noise_np = np.clip(noise_np, 0, 1)
 
-            x_noisy    = x_test + noise
+            x_noisy = x_test + noise
             x_noisy_np = x_noisy.data.cpu().numpy().transpose(0,2,3,1)
             x_noisy_np = np.clip(x_noisy_np, 0, 1)
 
@@ -244,13 +238,13 @@ def GlowDenoiser(args):
 
         # metric evaluations
 
-        Original  = np.vstack(Original)
-        Recovered = np.vstack(Recovered)
-        Noisy     = np.vstack(Noisy)
-        Noise     = np.vstack(Noise)
+        Original = np.vstack(Original)
+        Noisy = np.vstack(Noisy)
+        Noise = np.vstack(Noise)
 
         psnr = None
         try:
+            Recovered = np.vstack(Recovered)
             psnr = [compare_psnr(x, y) for x,y in zip(Original, Recovered)]
         except Exception as e:
             traceback.print_exc()
@@ -258,11 +252,11 @@ def GlowDenoiser(args):
         # print performance analysis
 
         printout = "+-"*10 + "%s"%args.dataset + "-+"*10 + "\n"
-        printout = printout + "\t n_test     = %d\n"%len(Recovered)
-        printout = printout + "\t noise_std  = %0.4f\n"%args.noise_scale
-        printout = printout + "\t gamma      = %0.6f\n"%gamma
+        printout = printout + "\t n_test = %d\n"%len(Recovered)
+        printout = printout + "\t noise_std = %0.4f\n"%args.noise_scale
+        printout = printout + "\t gamma = %0.6f\n"%gamma
         if psnr is not None:
-            printout = printout + "\t PSNR       = %0.3f\n"%np.mean(psnr)
+            printout = printout + "\t PSNR = %0.3f\n"%np.mean(psnr)
         print(printout)
 
         if args.save_metrics_text:
@@ -282,11 +276,6 @@ def GlowDenoiser(args):
                                                 f'{round(gamma, 4)}_{gettime()}')
             print(save_path)
 
-            # save_path = save_path + "/denoising_noisestd_" \
-            #                         "%0.4f_gamma_%0.6f_steps_%d_lr_%0.3f_init_std_%0.2f_optim_%s"
-            # save_path = save_path%(args.noise_std, gamma, args.steps,
-            #                        args.lr, args.init_std, args.optim)
-
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             else:
@@ -299,14 +288,17 @@ def GlowDenoiser(args):
                     if not os.path.exists(save_path_2):
                         os.makedirs(save_path_2)
                         save_path = save_path_2
-            _ = [sio.imsave(save_path+"/"+name+"_recov.jpg", x) for x,name in zip(Recovered,file_names)]
-            _ = [sio.imsave(save_path+"/"+name+"_noisy.jpg", x) for x,name in zip(Noisy,file_names)]
+            _ = [sio.imsave(save_path+"/"+name+"_noisy.jpg", x) for x, name in zip(Noisy, file_names)]
             Residual_Curve = np.array(Residual_Curve).mean(axis=0)
             np.save(save_path+"/residual_curve.npy", Residual_Curve)
             np.save(save_path+"/original.npy", Original)
-            np.save(save_path+"/recovered.npy", Recovered)
             np.save(save_path+"/noisy.npy", Noisy)
             np.save(save_path+"/noise.npy", Noise)
+
+            if len(Recovered) > 0:
+                np.save(save_path + "/recovered.npy", Recovered)
+                _ = [sio.imsave(save_path + "/" + name + "_recov.jpg", x) for x, name in
+                     zip(Recovered, file_names)]
 
 
 def GANDenoiser(args):
