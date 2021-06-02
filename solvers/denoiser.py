@@ -226,7 +226,7 @@ def GlowDenoiser(args):
             # freeing up memory for second loop
             glow.zero_grad()
             optimizer.zero_grad()
-            del x_test, x_gen, optimizer, psnr_t, z_sampled, glow, noise,
+            # del x_test, x_gen, optimizer, psnr_t, z_sampled, glow, noise,
             with torch.cuda.device(args.device):
                 torch.cuda.empty_cache()
             print("\nbatch completed")
