@@ -63,8 +63,8 @@ def recon_loss(noise, loc, scale):
     elif noise == 'loggamma':
         def _recon(x_gen, x_noisy):
             delta = x_gen - x_noisy
-            delta = torch.exp(delta)
-            nll = scale * delta - (loc - 1) * torch.log(delta)
+            delta_exp = torch.exp(delta)
+            nll = scale * delta_exp - (loc - 1) * delta
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
         return _recon
 
@@ -195,19 +195,17 @@ def GlowDenoiser(args):
             # if skip_to_next:
             #     break
 
-            # getting recovered and true images
             x_test_np = x_test.data.cpu().numpy().transpose(0, 2, 3, 1)
+            Original.append(x_test_np)
 
             noise_np = noise.data.cpu().numpy().transpose(0, 2, 3, 1)
-            noise_np = np.clip(noise_np, 0, 1)
-
-            x_noisy = x_test + noise
-            x_noisy_np = x_noisy.data.cpu().numpy().transpose(0,2,3,1)
-            x_noisy_np = np.clip(x_noisy_np, 0, 1)
-
-            Original.append(x_test_np)
-            Noisy.append(x_noisy_np)
+            # noise_np = np.clip(noise_np, 0, 1)
             Noise.append(noise_np)
+
+            # x_noisy = x_test + noise
+            x_noisy_np = x_noisy.data.cpu().numpy().transpose(0, 2, 3, 1)
+            x_noisy_np = np.clip(x_noisy_np, 0, 1)
+            Noisy.append(x_noisy_np)
 
             Residual_Curve.append(residual)
 
@@ -215,8 +213,9 @@ def GlowDenoiser(args):
                 z_unflat = glow.unflatten_z(z_sampled, clone=False)
                 x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
                 x_gen = glow.postprocess(x_gen,floor_clamp=False)
-                x_gen_np = x_gen.data.cpu().numpy().transpose(0,2,3,1)
-                x_gen_np = np.clip(x_gen_np,0,1)
+
+                x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
+                x_gen_np = np.clip(x_gen_np, 0, 1)
                 Recovered.append(x_gen_np)
             except Exception as e:
                 traceback.print_exc()
@@ -224,7 +223,7 @@ def GlowDenoiser(args):
             # freeing up memory for second loop
             glow.zero_grad()
             optimizer.zero_grad()
-            # del x_test, x_gen, optimizer, psnr_t, z_sampled, glow, noise,
+            del x_test, x_gen, optimizer, psnr_t, z_sampled, glow, noise,
             with torch.cuda.device(args.device):
                 torch.cuda.empty_cache()
             print("\nbatch completed")
