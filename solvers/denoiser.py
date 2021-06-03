@@ -55,7 +55,7 @@ def Noiser(args, configs):
 def recon_loss(noise, loc, scale):
     if noise == 'gaussian':
         def _recon(x_gen, x_noisy):
-            delta = x_gen - x_noisy
+            delta = x_noisy - x_gen
             nll = delta ** 2
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
         return _recon
@@ -70,7 +70,7 @@ def recon_loss(noise, loc, scale):
 
     elif noise == 'gamma':
         def _recon(x_gen, x_noisy):
-            delta = x_gen - x_noisy
+            delta = x_noisy - x_gen
             nll = scale * delta - (loc - 1) * torch.log(delta)
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
         return _recon
@@ -207,12 +207,9 @@ def GlowDenoiser(args):
             Original.append(x_test_np)
 
             noise_np = noise.data.cpu().numpy().transpose(0, 2, 3, 1)
-            # noise_np = np.clip(noise_np, 0, 1)
             Noise.append(noise_np)
 
-            # x_noisy = x_test + noise
             x_noisy_np = x_noisy.data.cpu().numpy().transpose(0, 2, 3, 1)
-            x_noisy_np = np.clip(x_noisy_np, 0, 1)
             Noisy.append(x_noisy_np)
 
             Residual_Curve.append(residual)
