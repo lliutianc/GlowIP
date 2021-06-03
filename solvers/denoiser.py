@@ -155,7 +155,7 @@ def GlowDenoiser(args):
 
             _ = glow(glow.preprocess(torch.zeros_like(x_test)))
 
-            np.random.seed(args.random_seed)
+            # np.random.seed(args.random_seed)
             if args.init_strategy == "random":
                 z_sampled = np.random.normal(0, args.init_std, [n_test, n])
             elif args.init_strategy == "from-noisy":
