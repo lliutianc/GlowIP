@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # trainable parameters
     parser.add_argument('-init_strategy', type=str, help="init strategy to use", default='random')
-    parser.add_argument('-init_std', type=float, help='std of init_strategy is random', default=0.5)
+    parser.add_argument('-init_std', type=float, help='std of init_strategy is random', default=0.2)
 
     # save and other config
     parser.add_argument('-save_metrics_text', type=bool, help='whether to save results to a text file', default=True)
@@ -49,6 +49,3 @@ if __name__ == "__main__":
         args.device = torch.device(f'cuda' if torch.cuda.is_available() else 'cpu')
 
     solveDenoising(args)
-
-
-# python solve_denoising.py -prior glow -experiment denoise -dataset celeba -gamma 0.0125 -batchsize 4 -noise glow
