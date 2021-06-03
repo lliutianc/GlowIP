@@ -168,11 +168,6 @@ def GlowDenoiser(args):
             z_sampled = torch.from_numpy(z_sampled).float().to(args.device)
             z_sampled = nn.Parameter(z_sampled, requires_grad=True)
 
-            print(noise)
-            print(z_sampled)
-            print('-' * 80)
-            exit(1)
-
             # selecting optimizer
 
             if args.optim == "adam":
