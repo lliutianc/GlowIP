@@ -44,6 +44,7 @@ def Noiser(args, configs):
 
     if args.noise == 'poisson':
         noise = poisson_noise(args.noise_loc, args.noise_scale)
+        return noise
 
     if args.noise in ['glow', 'dcgan']:
         noise = image_noise(args.noise_loc, args.noise_scale,
