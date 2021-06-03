@@ -9,10 +9,10 @@ import skimage.io as sio
 
 import json
 import os
+import traceback
 import warnings
 warnings.filterwarnings("ignore")
 
-import traceback
 
 from glow.glow import Glow
 from dcgan.dcgan import Generator
@@ -262,7 +262,7 @@ def GlowDenoiser(args):
             Recovered = np.vstack(Recovered)
             psnr = [compare_psnr(x, y) for x,y in zip(Original, Recovered)]
         except Exception as e:
-            traceback.print_exc()
+            continue
 
         # print performance analysis
 

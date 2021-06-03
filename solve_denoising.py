@@ -24,10 +24,10 @@ if __name__ == "__main__":
     # parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1])
     # parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10, 20, 30, 40, 50])
     parser.add_argument('-optim', type=str, help='optimizer', default="lbfgs")
-    parser.add_argument('-z_penalty_unsquared', action="store_true", help="use ||z|| if True else ||z||^2")
     parser.add_argument('-lr', type=float, help='learning rate', default=1)
     parser.add_argument('-steps', type=int, help='no. of steps to run', default=20)
     parser.add_argument('-batchsize', type=int, help='no. of images to solve in parallel as batches', default=6)
+    parser.add_argument('-z_penalty_unsquared', action="store_true", help="use ||z|| if True else ||z||^2")
 
     # trainable parameters
     parser.add_argument('-init_strategy', type=str, help="init strategy to use", default='random')
