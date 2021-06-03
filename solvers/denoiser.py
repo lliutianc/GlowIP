@@ -74,14 +74,14 @@ def recon_loss(noise, loc, scale):
     elif noise == 'gamma':
         def _recon(x_gen, x_noisy):
             delta = x_noisy - x_gen
-            nll = scale * delta - (loc - 1) * torch.log(delta)
+            nll = scale * delta - (loc - 1) * torch.log(delta + 1e-10)
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
 
     elif noise == 'poisson':
         def _recon(x_gen, x_noisy):
             noisy256 = x_noisy * 255
             gen256 = x_gen * 255
-            nll = gen256 - noisy256 * torch.log(gen256)
+            nll = gen256 - noisy256 * torch.log(gen256 + 1e-10)
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
 
     else:
