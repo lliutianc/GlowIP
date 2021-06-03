@@ -62,7 +62,7 @@ def recon_loss(noise, loc, scale):
 
     elif noise == 'loggamma':
         def _recon(x_gen, x_noisy):
-            delta = x_gen - x_noisy
+            delta = x_noisy - x_gen
             delta_exp = torch.exp(delta)
             nll = scale * delta_exp - (loc - 1) * delta
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
