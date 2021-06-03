@@ -58,7 +58,7 @@ def poisson_noise(unused_loc, unused_scale):
     rng = np.random.RandomState(1)
 
     def _inner(image):
-        img_np = image.data.cpu().numpy
+        img_np = image.data.cpu().numpy()
         noise = rng.poisson(img_np * 255) / 255 - img_np
         return torch.from_numpy(noise).float().to(image.device)
     # return lambda image: torch.poisson(image * 255) / 255 - image
