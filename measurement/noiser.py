@@ -54,10 +54,9 @@ class NoisyMeasurement(Measurement):
         return noise
 
 
-def poisson_noise(loc):
+def poisson_noise(unused_loc, unused_scale):
     np.random.seed(1)
-    #todo: add poisson noise
-    pass
+    return lambda image: np.random.poisson(image * 255) / 255 - image
 
 
 def gamma_noise(loc, scale):
