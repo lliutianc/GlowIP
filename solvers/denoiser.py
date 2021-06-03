@@ -63,7 +63,6 @@ def recon_loss(noise, loc, scale):
             delta = x_noisy - x_gen
             nll = delta ** 2
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
-        return _recon
 
     elif noise == 'loggamma':
         def _recon(x_gen, x_noisy):
@@ -71,14 +70,12 @@ def recon_loss(noise, loc, scale):
             delta_exp = torch.exp(delta)
             nll = scale * delta_exp - (loc - 1) * delta
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
-        return _recon
 
     elif noise == 'gamma':
         def _recon(x_gen, x_noisy):
             delta = x_noisy - x_gen
             nll = scale * delta - (loc - 1) * torch.log(delta)
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
-        return _recon
 
     elif noise == 'poisson':
         def _recon(x_gen, x_noisy):
@@ -89,6 +86,8 @@ def recon_loss(noise, loc, scale):
 
     else:
         raise NotImplementedError()
+
+    return _recon
 
 
 def GlowDenoiser(args):
