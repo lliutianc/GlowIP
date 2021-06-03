@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # trainable parameters
     parser.add_argument('-init_strategy', type=str, help="init strategy to use", default='random')
-    parser.add_argument('-init_std', type=float, help='std of init_strategy is random', default=0.1)
+    parser.add_argument('-init_std', type=float, help='std of init_strategy is random', default=0.5)
 
     # save and other config
     parser.add_argument('-save_metrics_text', type=bool, help='whether to save results to a text file', default=True)
