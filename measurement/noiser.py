@@ -55,23 +55,30 @@ class NoisyMeasurement(Measurement):
 
 
 def poisson_noise(unused_loc, unused_scale):
-    np.random.seed(1)
-    return lambda image: torch.poisson(image * 255) / 255 - image
+    rng = np.random.RandomState(1)
+
+    def _inner(image):
+        img_np = image.data.cpu().numpy
+        noise = rng.poisson(img_np * 255) / 255 - img_np
+        return torch.from_numpy(noise).float().to(image.device)
+    # return lambda image: torch.poisson(image * 255) / 255 - image
+
+    return _inner
 
 
 def gamma_noise(loc, scale):
-    np.random.seed(1)
-    return lambda size: np.random.gamma(size=size, shape=loc, scale=scale) / 255
+    rng = np.random.RandomState(1)
+    return lambda size: rng.gamma(size=size, shape=loc, scale=scale) / 255
 
 
 def loggamma_noise(loc, scale):
-    np.random.seed(1)
-    return lambda size: np.log(np.random.gamma(size=size, shape=loc, scale=scale)) / 255
+    rng = np.random.RandomState(1)
+    return lambda size: np.log(rng.gamma(size=size, shape=loc, scale=scale)) / 255
 
 
 def gaussian_noise(loc, scale):
-    np.random.seed(1)
-    return lambda size: np.random.normal(size=size, loc=loc, scale=scale)
+    rng = np.random.RandomState(1)
+    return lambda size: rng.normal(size=size, loc=loc, scale=scale)
 
 
 def image_noise(unused_loc, scale, **image_prior):
