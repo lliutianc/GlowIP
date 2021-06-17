@@ -6,3 +6,6 @@
 
 *checkpoint*
 *Untitle*
+
+*.DS_Store
+**/.DS_Store
