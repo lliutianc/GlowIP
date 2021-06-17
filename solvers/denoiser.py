@@ -96,7 +96,7 @@ def recon_loss(noise, loc, scale):
             delta = x_noisy - x_gen
             z = (delta - loc) / scale
             z = z.view(len(delta), -1)
-            z_min_per_obs = torch.min(z, dim=1)
+            z_min_per_obs = torch.min(z, dim=1)[0]
             # print(z.shape)
             # print(z_min_per_obs.shape)
             # exit(1)
