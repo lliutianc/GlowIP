@@ -65,6 +65,11 @@ def poisson_noise(unused_loc, unused_scale):
     return _inner
 
 
+def logistic_noise(loc, scale):
+    rng = np.random.RandomState(1)
+    return lambda size: rng.logistic(size=size, scale=scale, loc=loc)
+
+
 def gamma_noise(loc, scale):
     rng = np.random.RandomState(1)
     return lambda size: rng.gamma(size=size, shape=loc, scale=scale) / 255

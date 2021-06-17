@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 from glow.glow import Glow
 from dcgan.dcgan import Generator
 from measurement.noiser import NoisyMeasurement
-from measurement.noiser import gaussian_noise, gamma_noise, loggamma_noise, poisson_noise
+from measurement.noiser import *
 from measurement.noiser import image_noise
 from utils import gettime
 
@@ -28,29 +28,36 @@ def solveDenoising(args):
     elif args.prior == 'dcgan':
         GANDenoiser(args)
     else:
-        raise NotImplementedError("prior not defined correctly")
+        raise ValueError(f"Unrecognized `prior`: {args.prior}")
 
 
 def Noiser(args, configs):
-    if args.noise == 'gaussian':
-        noise = gaussian_noise(args.noise_loc, args.noise_scale)
-
-    if args.noise == 'gamma':
-        # raise NotImplementedError('Don\'t know how to handle gamma noise yet')
-        noise = gamma_noise(args.noise_loc, args.noise_scale)
-
-    if args.noise == 'loggamma':
-        noise = loggamma_noise(args.noise_loc, args.noise_scale)
-
     if args.noise == 'poisson':
+        # Possion noise is not additive so handle it separately.
         noise = poisson_noise(args.noise_loc, args.noise_scale)
         return noise
 
-    if args.noise in ['glow', 'dcgan']:
+    elif args.noise == 'logistic':
+        noise = logistic_noise(args.noise_loc, args.noise_scale)
+
+    elif args.noise == 'gaussian':
+        noise = gaussian_noise(args.noise_loc, args.noise_scale)
+
+    elif args.noise == 'gamma':
+        # raise NotImplementedError('Don\'t know how to handle gamma noise yet')
+        noise = gamma_noise(args.noise_loc, args.noise_scale)
+
+    elif args.noise == 'loggamma':
+        noise = loggamma_noise(args.noise_loc, args.noise_scale)
+
+    elif args.noise in ['glow', 'dcgan']:
         noise = image_noise(args.noise_loc, args.noise_scale,
                             noise=args.noise, size=args.size, bsz=args.batchsize,
                             configs=configs, dataset=args.dataset,
                             device=args.device)
+
+    else:
+        raise ValueError(f'Unrecognized noise distribution: {args.noise}')
 
     noiser = NoisyMeasurement(noise, args.noise_channel, args.noise_area, args.device)
 
@@ -84,8 +91,20 @@ def recon_loss(noise, loc, scale):
             nll = gen256 - noisy256 * torch.log(gen256 + 1e-10)
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
 
+    elif noise == 'logisitc':
+        def _recon(x_gen, x_noisy):
+            delta = x_noisy - x_gen
+            z = (delta - loc) / scale
+            z = z.view(len(delta), -1)
+            z_min_per_obs = z.min(dim=1)
+            nll1 = z - z_min_per_obs
+            nll2 = torch.log(torch.exp(z_min_per_obs - z) + torch.exp(z_min_per_obs) + 1e-10)
+            nll = nll1 + 2 * nll2
+            nll = nll.sum(dim=1).mean()
+            return nll
+
     else:
-        raise NotImplementedError()
+        raise ValueError(f'Unrecognized noise distribution: {noise}')
 
     return _recon
 
