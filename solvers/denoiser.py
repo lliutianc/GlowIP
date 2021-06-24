@@ -349,13 +349,13 @@ def GlowDenoiser(args):
             if len(Recovered_per_10_steps) > 0:
                 for t, checkpoints in Recovered_per_10_steps.items():
                     try:
-                        np.save(save_path+f'recovered_{t}.npy', np.vstack(checkpoints))
+                        np.save(save_path+f'/recovered_{t}.npy', np.vstack(checkpoints))
                     except Exception as e:
                         traceback.print_exc()
                         break
 
             if len(Recovered) > 0:
-                np.save(save_path + "/recovered.npy", Recovered)
+                np.save(save_path + "/recovered_final.npy", Recovered)
                 _ = [sio.imsave(save_path + "/" + name + "_recov.jpg", x) for x, name in
                      zip(Recovered, file_names)]
 
