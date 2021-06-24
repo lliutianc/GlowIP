@@ -279,17 +279,17 @@ def GlowDenoiser(args):
 
             Residual_Curve.append(residual)
 
-            # x_gen = None
-            # try:
-            #     z_unflat = glow.unflatten_z(z_sampled, clone=False)
-            #     x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
-            #     x_gen = glow.postprocess(x_gen, floor_clamp=False)
-            #
-            #     x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
-            #     x_gen_np = np.clip(x_gen_np, 0, 1)
-            #     Recovered.append(x_gen_np)
-            # except Exception as e:
-            #     traceback.print_exc()
+            x_gen = None
+            try:
+                z_unflat = glow.unflatten_z(z_sampled, clone=False)
+                x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+                x_gen = glow.postprocess(x_gen, floor_clamp=False)
+
+                x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
+                x_gen_np = np.clip(x_gen_np, 0, 1)
+                Recovered.append(x_gen_np)
+            except Exception as e:
+                traceback.print_exc()
 
             # freeing up memory for second loop
             glow.zero_grad()
