@@ -96,7 +96,7 @@ def recon_loss(noise, loc, scale):
             delta = x_noisy - x_gen
             z = (delta - loc) / scale
             z = z.view(len(delta), -1)
-            
+
             # z_min_per_obs = torch.min(z, dim=1, keepdim=True)[0]
             # nll1 = z - z_min_per_obs
             # nll2 = torch.log(torch.exp(z_min_per_obs - z) + torch.exp(z_min_per_obs) + 1e-10)
@@ -145,6 +145,7 @@ def GlowDenoiser(args):
         # getting test images
         Original  = []
         Recovered = []
+        Recovered_per_10_steps = {}
         Noisy     = []
         Noise     = []
         Residual_Curve = []
@@ -203,7 +204,7 @@ def GlowDenoiser(args):
 
             # running optimizer steps
 
-            for t in range(args.steps):
+            for t in range(1, args.steps+1):
                 try:
                     def closure():
                         optimizer.zero_grad()
@@ -226,6 +227,19 @@ def GlowDenoiser(args):
                         return loss_t
                     optimizer.step(closure)
                     residual.append(residual_t.item())
+
+                    if t % 10 == 0:
+                        z_unflat = glow.unflatten_z(z_sampled, clone=False)
+                        x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+                        x_gen = glow.postprocess(x_gen, floor_clamp=False)
+
+                        x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
+                        x_gen_np = np.clip(x_gen_np, 0, 1)
+                        if t in Recovered_per_10_steps:
+                            Recovered_per_10_steps[t].append(x_gen_np)
+                        else:
+                            Recovered_per_10_steps[t] = [x_gen_np]
+
                 except Exception as e:
                     traceback.print_exc()
                     skip_to_next = True
@@ -278,6 +292,7 @@ def GlowDenoiser(args):
         Noisy = np.vstack(Noisy)
         Noise = np.vstack(Noise)
 
+        # Save final results
         psnr = None
         try:
             Recovered = np.vstack(Recovered)
@@ -330,6 +345,14 @@ def GlowDenoiser(args):
             np.save(save_path+"/original.npy", Original)
             np.save(save_path+"/noisy.npy", Noisy)
             np.save(save_path+"/noise.npy", Noise)
+
+            if len(Recovered_per_10_steps) > 0:
+                for t, checkpoints in Recovered_per_10_steps.items():
+                    try:
+                        np.save(save_path+f'recovered_{t}.npy', np.vstack(checkpoints))
+                    except Exception as e:
+                        traceback.print_exc()
+                        break
 
             if len(Recovered) > 0:
                 np.save(save_path + "/recovered.npy", Recovered)
