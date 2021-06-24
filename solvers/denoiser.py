@@ -142,12 +142,18 @@ def GlowDenoiser(args):
         # regularizor
         gamma = torch.tensor(gamma, requires_grad=True, dtype=torch.float, device=args.device)
 
-        # getting test images
-        Original  = []
-        Recovered = []
+        # results to save
+
+        Original = []
+        Noisy = []
+        Noise = []
+
+        Original_base = []
+        Noisy_base = []
+
         Recovered_per_10_steps = {}
-        Noisy     = []
-        Noise     = []
+        Recovered_base_per_10_steps = {}
+
         Residual_Curve = []
         for i, data in enumerate(test_dataloader):
 
@@ -181,11 +187,11 @@ def GlowDenoiser(args):
             if args.init_strategy == "random":
                 z_sampled = np.random.normal(0, args.init_std, [n_test, n])
             elif args.init_strategy == "from-noisy":
-                z, _, _     = glow(glow.preprocess(x_noisy*255,clone=True))
-                z           = glow.flatten_z(z)
-                z_sampled   = z.clone().detach().cpu().numpy()
+                z, _, _ = glow(glow.preprocess(x_noisy*255,clone=True))
+                z = glow.flatten_z(z)
+                z_sampled = z.clone().detach().cpu().numpy()
             else:
-                raise NotImplementedError("Initialization strategy not defined")
+                raise ValueError("Unrecognized initialization strategy")
 
             z_sampled = torch.from_numpy(z_sampled).float().to(args.device)
             z_sampled = nn.Parameter(z_sampled, requires_grad=True)
@@ -198,9 +204,16 @@ def GlowDenoiser(args):
                 optimizer = torch.optim.LBFGS([z_sampled], lr=args.lr,)
 
             # to be recorded over iteration
+            z_original_unflat = glow(glow.preprocess(x_test * 255, clone=True))
+            z_original_np = glow.flatten_z(z_original_unflat).data.cpu().numpy()
+            Original_base.append(z_original_np)
 
-            psnr_t    = torch.nn.MSELoss().to(device=args.device)
-            residual  = []
+            z_noisy_unflat = glow(glow.preprocess(x_noisy * 255, clone=True))
+            z_noisy_np = glow.flatten_z(z_noisy_unflat).data.cpu().numpy()
+            Noisy_base.append(z_noisy_np)
+
+            psnr_t = torch.nn.MSELoss().to(device=args.device)
+            residual = []
 
             # running optimizer steps
 
@@ -239,6 +252,12 @@ def GlowDenoiser(args):
                             Recovered_per_10_steps[t].append(x_gen_np)
                         else:
                             Recovered_per_10_steps[t] = [x_gen_np]
+
+                        z_flatted = z_sampled.data.cpu().numpy()
+                        if t in Recovered_base_per_10_steps:
+                            Recovered_base_per_10_steps[t].append(z_flatted)
+                        else:
+                            Recovered_base_per_10_steps[t] = [z_flatted]
 
                 except Exception as e:
                     traceback.print_exc()
@@ -291,6 +310,8 @@ def GlowDenoiser(args):
         Original = np.vstack(Original)
         Noisy = np.vstack(Noisy)
         Noise = np.vstack(Noise)
+        Original_base = np.vstack(Original_base)
+        Noisy_base = np.vstack(Noisy_base)
 
         # Save final results
         psnr = None
@@ -325,7 +346,6 @@ def GlowDenoiser(args):
                                                 f'{args.noise_channel}_{args.noise_area}_'
                                                 f'{args.init_strategy}_'
                                                 f'{round(gamma, 4)}_{gettime()}')
-            print(save_path)
 
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
@@ -346,6 +366,9 @@ def GlowDenoiser(args):
             np.save(save_path+"/noisy.npy", Noisy)
             np.save(save_path+"/noise.npy", Noise)
 
+            np.save(save_path+"/base_noisy.npy", Noisy_base)
+            np.save(save_path+"/base_original.npy", Original_base)
+
             if len(Recovered_per_10_steps) > 0:
                 for t, checkpoints in Recovered_per_10_steps.items():
                     try:
@@ -354,10 +377,18 @@ def GlowDenoiser(args):
                         traceback.print_exc()
                         break
 
-            if len(Recovered) > 0:
-                np.save(save_path + "/recovered_final.npy", Recovered)
-                _ = [sio.imsave(save_path + "/" + name + "_recov.jpg", x) for x, name in
-                     zip(Recovered, file_names)]
+            if len(Recovered_base_per_10_steps) > 0:
+                for t, checkpoints in Recovered_base_per_10_steps.items():
+                    try:
+                        np.save(save_path+f'/base_{t}.npy', np.vstack(checkpoints))
+                    except Exception as e:
+                        traceback.print_exc()
+                        break
+
+            # if len(Recovered) > 0:
+            #     np.save(save_path + "/recovered_final.npy", Recovered)
+            #     _ = [sio.imsave(save_path + "/" + name + "_recov.jpg", x) for x, name in
+            #          zip(Recovered, file_names)]
 
 
 def GANDenoiser(args):
