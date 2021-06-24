@@ -5,7 +5,7 @@
 #SBATCH --mem-per-cpu=8G
 #SBATCH --mail-type=END
 
-#SBATCH --time=1:00:00
+#SBATCH --time=5:00:00
 #SBATCH --output=sbatch-logs/%x-%j.SLURM
 
 echo $CUDA_VISIBLE_DEVICES
