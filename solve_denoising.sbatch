@@ -31,7 +31,7 @@ python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batch
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 5. -noise_loc 1. -noise loggamma
 
 # logistics noise
-python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.05 -noise logistic
+#python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.05 -noise logistic
 
 # gamma noise: can noisy-init help?
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 5. -noise_loc 1. -noise gamma -init_strategy from-noisy
