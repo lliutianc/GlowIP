@@ -328,8 +328,8 @@ def GlowDenoiser(args):
         printout = printout + "\t n_test = %d\n"%len(Recovered)
         printout = printout + "\t noise_std = %0.4f\n"%args.noise_scale
         printout = printout + "\t gamma = %0.6f\n"%gamma
-        if psnr is not None:
-            printout = printout + "\t PSNR = %0.3f\n"%np.mean(psnr)
+        # if psnr is not None:
+        #     printout = printout + "\t PSNR = %0.3f\n"%np.mean(psnr)
         print(printout)
 
         if args.save_metrics_text:
