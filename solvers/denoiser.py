@@ -204,11 +204,11 @@ def GlowDenoiser(args):
                 optimizer = torch.optim.LBFGS([z_sampled], lr=args.lr,)
 
             # to be recorded over iteration
-            z_original_unflat = glow(glow.preprocess(x_test * 255, clone=True)[0])
+            z_original_unflat = glow(glow.preprocess(x_test * 255, clone=True))[0]
             z_original_np = glow.flatten_z(z_original_unflat).data.cpu().numpy()
             Original_base.append(z_original_np)
 
-            z_noisy_unflat = glow(glow.preprocess(x_noisy * 255, clone=True)[0])
+            z_noisy_unflat = glow(glow.preprocess(x_noisy * 255, clone=True))[0]
             z_noisy_np = glow.flatten_z(z_noisy_unflat).data.cpu().numpy()
             Noisy_base.append(z_noisy_np)
 
