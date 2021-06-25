@@ -23,6 +23,7 @@ conda activate glow
 
 # gaussian noise
 python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.1 -noise gaussian
+python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.1 -noise gaussian -lr 0.5 -steps 100
 
 ## poisson noise
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.1 -noise poisson -gamma 0.1
@@ -31,7 +32,8 @@ python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batch
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 5. -noise_loc 1. -noise loggamma
 
 # logistics noise
-#python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.05 -noise logistic
+python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.05 -noise logistic
+python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 0.05 -noise logistic -lr 0.5 -steps 100
 
 # gamma noise: can noisy-init help?
 #python solve_denoising.py -prior glow -experiment denoise -dataset celeba -batchsize 4 -noise_scale 5. -noise_loc 1. -noise gamma -init_strategy from-noisy
