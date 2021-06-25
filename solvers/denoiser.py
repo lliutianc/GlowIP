@@ -156,6 +156,7 @@ def GlowDenoiser(args):
         Recovered_base_per_10_steps = {}
 
         Residual_Curve = []
+        PSNR_Curve = []
         for i, data in enumerate(test_dataloader):
 
             x_test = data[0]
@@ -215,7 +216,7 @@ def GlowDenoiser(args):
 
             psnr_t = torch.nn.MSELoss().to(device=args.device)
             residual = []
-
+            psnr_hist = []
             # running optimizer steps
 
             for t in range(1, args.steps+1):
@@ -232,6 +233,7 @@ def GlowDenoiser(args):
                         else:
                             z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
                         loss_t = residual_t + z_reg_loss_t
+                        global psnr
                         psnr = psnr_t(x_test, x_gen)
                         psnr = 10 * np.log10(1 / psnr.item())
                         print("\rAt step=%0.3d|loss=%0.4f|residual=%0.4f|z_reg=%0.5f|psnr=%0.3f"%(
@@ -241,6 +243,7 @@ def GlowDenoiser(args):
                         return loss_t
                     optimizer.step(closure)
                     residual.append(residual_t.item())
+                    psnr_hist.append(psnr)
 
                     if t % 10 == 0:
                         z_unflat = glow.unflatten_z(z_sampled, clone=False)
@@ -278,6 +281,7 @@ def GlowDenoiser(args):
             Noisy.append(x_noisy_np)
 
             Residual_Curve.append(residual)
+            PSNR_Curve.append(psnr_hist)
 
             x_gen = None
             try:
@@ -360,9 +364,13 @@ def GlowDenoiser(args):
                     if not os.path.exists(save_path_2):
                         os.makedirs(save_path_2)
                         save_path = save_path_2
-            _ = [sio.imsave(save_path+"/"+name+"_noisy.jpg", x) for x, name in zip(Noisy, file_names)]
+            # _ = [sio.imsave(save_path+"/"+name+"_noisy.jpg", x) for x, name in zip(Noisy, file_names)]
+
             Residual_Curve = np.array(Residual_Curve).mean(axis=0)
+            PSNR_Curve = np.array(PSNR_Curve).mean(axis=0)
             np.save(save_path+"/residual_curve.npy", Residual_Curve)
+            np.save(save_path+"/psnr_curve.npy", PSNR_Curve)
+
             np.save(save_path+"/original.npy", Original)
             np.save(save_path+"/noisy.npy", Noisy)
             np.save(save_path+"/noise.npy", Noise)
