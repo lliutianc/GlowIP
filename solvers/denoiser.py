@@ -192,6 +192,10 @@ def GlowDenoiser(args):
                 z, _, _ = glow(glow.preprocess(x_noisy*255,clone=True))
                 z = glow.flatten_z(z)
                 z_sampled = z.clone().detach().cpu().numpy()
+            elif args.init_strategy == 'from-real':
+                z, _, _ = glow(glow.preprocess(x_test*255,clone=True))
+                z = glow.flatten_z(z)
+                z_sampled = z.clone().detach().cpu().numpy()
             else:
                 raise ValueError("Unrecognized initialization strategy")
 
