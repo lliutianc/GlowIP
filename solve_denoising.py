@@ -1,5 +1,6 @@
 import argparse
 from solvers.denoiser import solveDenoising
+from solvers.redenoiser import solveDenoising as solveDenoisingWithRestart
 
 import torch
 
@@ -8,6 +9,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='solve denoising')
     # task details: prior, dataset, image size
     parser.add_argument('-experiment', type=str, help='the name of experiment', default='denoising')
+    parser.add_argument('-restart_denoise', type=int, default=1)
     parser.add_argument('-prior', type=str, help='choose with prior to use glow, dcgan', default='glow')
     parser.add_argument('-dataset', type=str, help='the dataset/images to use', default='celeba')
     parser.add_argument('-size', type=int, help='size of images to resize all images to',
@@ -22,6 +24,7 @@ if __name__ == "__main__":
     # training
     # parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0.0125])
     parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.0125, 0.025, 0.05, 0.075, 0.1])
+    parser.add_argument('-init_gamma',  type=float, default=0.05, helper='regularizor in stage 1')
     # parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2])
     # parser.add_argument('-gamma',  type=float, nargs='+', help='regularizor', default=[0, 0.01, 0.0125, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10, 20, 30, 40, 50])
     parser.add_argument('-optim', type=str, help='optimizer', default="lbfgs")
@@ -49,4 +52,7 @@ if __name__ == "__main__":
         # formal situation will handle the cuda allocation automatically
         args.device = torch.device(f'cuda' if torch.cuda.is_available() else 'cpu')
 
-    solveDenoising(args)
+    if args.restart_denoise:
+        solveDenoisingWithRestart(args)
+    else:
+        solveDenoising(args)
