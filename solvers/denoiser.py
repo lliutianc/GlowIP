@@ -224,7 +224,26 @@ def GlowDenoiser(args):
             psnr_t = torch.nn.MSELoss().to(device=args.device)
             residual = []
             psnr_hist = []
-            # running optimizer steps
+
+            # save initial results.
+            t = 0
+            z_unflat = glow.unflatten_z(z_sampled, clone=True)
+            x_gen = glow(z_unflat, reverse=True, reverse_clone=True)
+            x_gen = glow.postprocess(x_gen, floor_clamp=False)
+
+            x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
+            x_gen_np = np.clip(x_gen_np, 0, 1)
+            if t in Recovered_per_10_steps:
+                Recovered_per_10_steps[t].append(x_gen_np)
+            else:
+                Recovered_per_10_steps[t] = [x_gen_np]
+
+            z_flatted = z_sampled.data.cpu().numpy()
+            if t in Recovered_base_per_10_steps:
+                Recovered_base_per_10_steps[t].append(z_flatted)
+            else:
+                Recovered_base_per_10_steps[t] = [z_flatted]
+            del z_unflat, x_gen
 
             for t in range(1, args.steps+1):
                 try:
@@ -232,7 +251,7 @@ def GlowDenoiser(args):
                         optimizer.zero_grad()
                         z_unflat = glow.unflatten_z(z_sampled, clone=False)
                         x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
-                        x_gen = glow.postprocess(x_gen,floor_clamp=False)
+                        x_gen = glow.postprocess(x_gen, floor_clamp=False)
                         global residual_t
                         residual_t = loss(x_gen, x_noisy)
                         if not args.z_penalty_unsquared:
@@ -253,8 +272,8 @@ def GlowDenoiser(args):
                     psnr_hist.append(psnr)
 
                     if t % 10 == 0:
-                        z_unflat = glow.unflatten_z(z_sampled, clone=False)
-                        x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
+                        z_unflat = glow.unflatten_z(z_sampled, clone=True)
+                        x_gen = glow(z_unflat, reverse=True, reverse_clone=True)
                         x_gen = glow.postprocess(x_gen, floor_clamp=False)
 
                         x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
@@ -269,6 +288,7 @@ def GlowDenoiser(args):
                             Recovered_base_per_10_steps[t].append(z_flatted)
                         else:
                             Recovered_base_per_10_steps[t] = [z_flatted]
+                        del z_unflat, x_gen
 
                 except Exception as e:
                     traceback.print_exc()
