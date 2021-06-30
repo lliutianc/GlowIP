@@ -246,10 +246,12 @@ def GlowDenoiser(args):
                     skip_to_next = True
                     break
 
+
             # Stage 2: use trained z_sampled
 
             # reset training states
             z_sampled = z_sampled.detach().clone()
+            z_sampled = nn.Parameter(z_sampled, requires_grad=True)
             if args.optim == "adam":
                 optimizer = torch.optim.Adam([z_sampled], lr=args.lr,)
             elif args.optim == "lbfgs":
