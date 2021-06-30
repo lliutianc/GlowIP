@@ -188,14 +188,17 @@ def GlowDenoiser(args):
             # np.random.seed(args.random_seed)
             if args.init_strategy == "random":
                 z_sampled = np.random.normal(0, args.init_std, [n_test, n])
+
             elif args.init_strategy == "from-noisy":
-                z, _, _ = glow(glow.preprocess(x_noisy*255,clone=True))
+                z, _, _ = glow(glow.preprocess(x_noisy * 255, clone=True))
                 z = glow.flatten_z(z)
                 z_sampled = z.clone().detach().cpu().numpy()
+
             elif args.init_strategy == 'from-real':
-                z, _, _ = glow(glow.preprocess(x_test*255,clone=True))
+                z, _, _ = glow(glow.preprocess(x_test * 255, clone=True))
                 z = glow.flatten_z(z)
                 z_sampled = z.clone().detach().cpu().numpy()
+
             else:
                 raise ValueError("Unrecognized initialization strategy")
 
@@ -233,9 +236,9 @@ def GlowDenoiser(args):
                         global residual_t
                         residual_t = loss(x_gen, x_noisy)
                         if not args.z_penalty_unsquared:
-                            z_reg_loss_t= gamma*(z_sampled.norm(dim=1)**2).mean()
+                            z_reg_loss_t= gamma * (z_sampled.norm(dim=1)**2).mean()
                         else:
-                            z_reg_loss_t= gamma*z_sampled.norm(dim=1).mean()
+                            z_reg_loss_t= gamma * z_sampled.norm(dim=1).mean()
                         loss_t = residual_t + z_reg_loss_t
                         global psnr
                         psnr = psnr_t(x_test, x_gen)
