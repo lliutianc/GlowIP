@@ -422,6 +422,7 @@ def GlowDenoiser(args):
                                                 f'{args.noise_loc}#{args.noise_scale}_'
                                                 f'{args.noise_channel}_{args.noise_area}_'
                                                 f'{args.init_strategy}_'
+                                                f'{args.restart_denoise * "restart_"}'
                                                 f'{round(gamma, 4)}_{gettime()}')
 
             if not os.path.exists(save_path):
