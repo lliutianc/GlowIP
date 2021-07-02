@@ -81,27 +81,27 @@ def recon_loss(noise, loc, scale):
     elif noise == 'gamma':
         def _recon(x_gen, x_noisy):
             delta = x_noisy - x_gen
-
-            mask = (delta > 0).detach().clone()
-            mask.requires_grad = False
-            valid_delta = delta * mask
-            nll = valid_delta / (scale - 1) - (loc - 1) * torch.log(valid_delta + 1e-10)
-            nll_term = nll.view(len(x_noisy), -1).sum(dim=1).mean()
-            penalty_term = (delta * (1 - mask)).sum()
-
-            print(nll_term, penalty_term)
-            return nll_term + penalty_term
-
-            # nll = delta / (scale - 1) - (loc - 1) * torch.log(delta + 1e-10)
-            # nll = nll * mask + delta * (1 - mask) * 10.
-            # return nll.view(len(x_noisy), -1).sum(dim=1).mean()
+            nll = delta / (scale - 1) - (loc - 1) * torch.log(delta + 1e-10)
+            return nll.view(len(x_noisy), -1).sum(dim=1).mean()
 
     elif noise == 'poisson':
         def _recon(x_gen, x_noisy):
             noisy256 = x_noisy * 255
             gen256 = x_gen * 255
+
+            # mask = (delta > 0).detach().clone()
+            # mask.requires_grad = False
+            # valid_delta = delta * mask
+            # nll = valid_delta / (scale - 1) - (loc - 1) * torch.log(valid_delta + 1e-10)
+            # nll_term = nll.view(len(x_noisy), -1).sum(dim=1).mean()
+            # penalty_term = (delta * (1 - mask)).sum()
+            #
+            # print(nll_term, penalty_term)
+            # return nll_term + penalty_term
+            #
             nll = gen256 - noisy256 * torch.log(gen256 + 1e-10)
-            return nll.view(len(x_noisy), -1).sum(dim=1).mean()
+            print(nll.mean())
+            return nll.view(len(x_noisy), -1).sum(dim=1).mean() / 255
 
     elif noise == 'logistic':
         def _recon(x_gen, x_noisy):
