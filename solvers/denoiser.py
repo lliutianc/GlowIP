@@ -273,6 +273,11 @@ def GlowDenoiser(args):
                             z_reg_loss_t= gamma * (z_sampled.norm(dim=1)**2).mean()
                         else:
                             z_reg_loss_t= gamma * z_sampled.norm(dim=1).mean()
+                        if args.noise == 'gaussian':
+                            z_var_loss_t = (z_sampled ** 2).mean() - z.mean() ** 2
+                            z_var_loss_t = (z_var_loss_t - args.noise_scale) ** 2
+                            z_reg_loss_t += z_var_loss_t
+
                         loss_t = residual_t + z_reg_loss_t
                         global psnr
                         psnr = psnr_t(x_test, x_gen)
