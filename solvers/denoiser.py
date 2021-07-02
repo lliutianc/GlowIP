@@ -92,7 +92,7 @@ def recon_loss(noise, loc, scale):
             # print(scale_loss.mean().item(), nll_loss.mean().item())
             nll_loss += scale_loss.mean()
 
-            return nll_loss
+            return nll_loss * 100.
 
     elif noise == 'loggamma':
         def _recon(x_gen, x_noisy):
