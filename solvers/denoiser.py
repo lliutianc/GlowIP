@@ -67,9 +67,17 @@ def Noiser(args, configs):
 def recon_loss(noise, loc, scale):
     if noise == 'gaussian':
         def _recon(x_gen, x_noisy):
-            delta = x_noisy - x_gen
-            nll = delta ** 2
-            return nll.view(len(x_noisy), -1).sum(dim=1).mean()
+            delta = x_noisy - x_gen - loc
+            delta_flat = delta.view(len(x_noisy), -1)
+            nll = delta_flat ** 2
+            nll_loss = nll.sum(dim=1).mean()
+
+            var_loss = nll.mean(dim=1) - delta_flat.mean(1) ** 2
+            var_loss = (var_loss - scale) ** 2
+            nll_loss += var_loss
+
+            return nll_loss
+
 
     elif noise == 'loggamma':
         def _recon(x_gen, x_noisy):
@@ -273,11 +281,6 @@ def GlowDenoiser(args):
                             z_reg_loss_t= gamma * (z_sampled.norm(dim=1)**2).mean()
                         else:
                             z_reg_loss_t= gamma * z_sampled.norm(dim=1).mean()
-                        if args.noise == 'gaussian':
-                            z_var_loss_t = (z_sampled ** 2).mean() - z.mean() ** 2
-                            z_var_loss_t = (z_var_loss_t - args.noise_scale) ** 2
-                            z_reg_loss_t += z_var_loss_t
-
                         loss_t = residual_t + z_reg_loss_t
                         global psnr
                         psnr = psnr_t(x_test, x_gen)
