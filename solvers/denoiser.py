@@ -86,8 +86,8 @@ def recon_loss(noise, loc, scale):
             mask.requires_grad = False
             valid_delta = delta * mask
             nll = valid_delta / (scale - 1) - (loc - 1) * torch.log(valid_delta + 1e-10)
-            nll += delta * (1 - mask) * 10.
-            
+            nll -= delta * (1 - mask) * 10.
+
             # nll = delta / (scale - 1) - (loc - 1) * torch.log(delta + 1e-10)
             # nll = nll * mask + delta * (1 - mask) * 10.
             return nll.view(len(x_noisy), -1).sum(dim=1).mean()
