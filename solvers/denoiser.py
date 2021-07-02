@@ -94,7 +94,7 @@ def recon_loss(noise, loc, scale):
 
             valid_gen256 = gen256 * mask
             nll = valid_gen256 - noisy256 * torch.log(valid_gen256 + 1e-10)
-            nll -= gen256 * (1 - mask)
+            nll -= gen256 * (1 - mask) / 255
             # nll_term = nll.view(len(x_noisy), -1).sum(dim=1).mean()
             # penalty_term = (delta * (1 - mask)).sum()
             #
@@ -104,7 +104,7 @@ def recon_loss(noise, loc, scale):
 
             # nll = gen256 - noisy256 * torch.log(gen256 + 1e-10)
             # print(torch.log(gen256 + 1e-10).mean().item(), gen256.min().item(), '\n')
-            return nll.view(len(x_noisy), -1).sum(dim=1).mean() / 255
+            return nll.view(len(x_noisy), -1).sum(dim=1).mean()
 
     elif noise == 'logistic':
         def _recon(x_gen, x_noisy):
