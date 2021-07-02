@@ -100,7 +100,7 @@ def recon_loss(noise, loc, scale):
             # return nll_term + penalty_term
             #
             nll = gen256 - noisy256 * torch.log(gen256 + 1e-10)
-            print(nll.mean())
+            print(torch.log(gen256 + 1e-10).mean())
             return nll.view(len(x_noisy), -1).sum(dim=1).mean() / 255
 
     elif noise == 'logistic':
