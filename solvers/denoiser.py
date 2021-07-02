@@ -72,9 +72,10 @@ def recon_loss(noise, loc, scale):
             nll = delta_flat ** 2
             nll_loss = nll.sum(dim=1).mean()
 
-            var_loss = nll.mean(dim=1) - delta_flat.mean(1) ** 2
-            var_loss = (var_loss - scale) ** 2
-            nll_loss = var_loss.mean()
+            scale_loss = torch.sqrt(nll.mean(dim=1) - delta_flat.mean(1) ** 2)
+            scale_loss = (scale_loss - scale) ** 2
+            print(scale_loss, nll_loss)
+            nll_loss += scale_loss.mean()
 
             return nll_loss
 
