@@ -67,9 +67,17 @@ def Noiser(args, configs):
 def recon_loss(noise, loc, scale):
     if noise == 'gaussian':
         def _recon(x_gen, x_noisy):
-            delta = x_noisy - x_gen
-            nll = delta ** 2
-            return nll.view(len(x_noisy), -1).sum(dim=1).mean()
+            delta = x_noisy - x_gen - loc
+            delta_flat = delta.view(len(x_noisy), -1)
+            nll = delta_flat ** 2
+            nll_loss = nll.sum(dim=1).mean()
+
+            var_loss = nll.mean(dim=1) - delta_flat.mean(1) ** 2
+            var_loss = (var_loss - scale) ** 2
+            nll_loss += var_loss
+
+            return nll_loss
+
 
     elif noise == 'loggamma':
         def _recon(x_gen, x_noisy):
