@@ -66,13 +66,26 @@ def Noiser(args, configs):
 
 def recon_loss(noise, loc, scale):
     if noise == 'gaussian':
+        # def _recon(x_gen, x_noisy):
+        #     delta = x_noisy - x_gen - loc
+        #     delta_flat = delta.view(len(x_noisy), -1)
+        #     nll = delta_flat ** 2
+        #     nll_loss = nll.sum(dim=1).mean()
+        #
+        #     scale_loss = torch.sqrt(nll.mean(dim=1) - delta_flat.mean(1) ** 2)
+        #     scale_loss = (scale_loss - scale) ** 2
+        #     # print(scale_loss, nll_loss)
+        #     nll_loss += scale_loss.mean() * 100.
+        #
+        #     return nll_loss
+
         def _recon(x_gen, x_noisy):
             delta = x_noisy - x_gen - loc
             delta_flat = delta.view(len(x_noisy), -1)
             nll = delta_flat ** 2
             nll_loss = nll.sum(dim=1).mean()
 
-            scale_loss = torch.sqrt(nll.mean(dim=1) - delta_flat.mean(1) ** 2)
+            scale_loss = delta_flat.std(dim=1)
             scale_loss = (scale_loss - scale) ** 2
             # print(scale_loss, nll_loss)
             nll_loss += scale_loss.mean() * 100.
