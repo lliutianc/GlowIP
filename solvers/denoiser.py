@@ -74,7 +74,7 @@ def recon_loss(noise, loc, scale):
 
             var_loss = nll.mean(dim=1) - delta_flat.mean(1) ** 2
             var_loss = (var_loss - scale) ** 2
-            nll_loss += var_loss
+            nll_loss += var_loss.mean()
 
             return nll_loss
 
