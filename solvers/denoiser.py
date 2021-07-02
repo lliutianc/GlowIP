@@ -89,8 +89,8 @@ def recon_loss(noise, loc, scale):
 
             scale_loss = delta_flat.std(dim=1)
             scale_loss = (scale_loss - scale) ** 2
-            print(scale_loss.mean().item(), nll_loss.mean().item())
-            nll_loss = scale_loss.mean() * 100.
+            # print(scale_loss.mean().item(), nll_loss.mean().item())
+            nll_loss += scale_loss.mean()
 
             return nll_loss
 
