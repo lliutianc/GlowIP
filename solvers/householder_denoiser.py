@@ -210,10 +210,7 @@ def GlowDenoiser(args):
         vs = [nn.Parameter(torch.randn(n_test, n, device=args.device),
                            requires_grad=True) for _ in range(householder_iter)]
         # optimizer
-        if args.optim == "adam":
-            optimizer = torch.optim.Adam(vs, lr=args.lr,)
-        elif args.optim == "lbfgs":
-            optimizer = torch.optim.LBFGS(vs, lr=args.lr,)
+        optimizer = torch.optim.Adam(vs, lr=0.01)
 
         # to be recorded over iteration
         z_original_unflat = glow(glow.preprocess(x_test_up * 255, clone=True))[0]
@@ -254,29 +251,25 @@ def GlowDenoiser(args):
         del z_flat, z, x_gen, x_gen_np, noise_recov
         with torch.cuda.device(args.device):
             torch.cuda.empty_cache()
-            
+
         for t in range(1, args.steps + 1):
             try:
-                def closure():
-                    global nll, psnr
-                    optimizer.zero_grad()
-                    noise_recov = householder(vs) @ noise_estimate
-                    noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
-                    x_gen = x_noisy - noise_recov
-                    x_gen = upsample_trans(x_gen)
-                    nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
-                    nll.backward(retain_graph=True)
-                    torch.nn.utils.clip_grad_value_(vs, 5)
+                optimizer.zero_grad()
+                noise_recov = householder(vs) @ noise_estimate
+                noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
+                x_gen = x_noisy - noise_recov
+                x_gen = upsample_trans(x_gen)
+                nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
+                nll.backward()
+                torch.nn.utils.clip_grad_value_(vs, 5)
+                optimizer.step()
 
-                    psnr = psnr_t(upsample_trans(x_noisy), x_gen)
-                    psnr = 10 * np.log10(1 / psnr.item())
-                    print(f'\rStep={t}|'
-                          f'Loss={nll.item():.4f}|'
-                          f'PSNR(noisy)={psnr:.3f}', end='\r')
+                psnr = psnr_t(upsample_trans(x_noisy), x_gen)
+                psnr = 10 * np.log10(1 / psnr.item())
+                print(f'\rStep={t}|'
+                      f'Loss={nll.item():.4f}|'
+                      f'PSNR(noisy)={psnr:.3f}', end='\r')
 
-                    return nll
-
-                optimizer.step(closure)
                 residual.append(nll.item())
                 psnr_hist.append(psnr)
 
