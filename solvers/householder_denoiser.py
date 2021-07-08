@@ -186,7 +186,7 @@ def GlowDenoiser(args):
                     nn_init_last_zeros=configs["last_zeros"],
                     device=args.device)
         glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
-        glow.eval()
+        # glow.eval()
 
         householder = householder_caster(n_test, n, args.device)
 
@@ -254,14 +254,14 @@ def GlowDenoiser(args):
 
         for t in range(1, args.steps + 1):
             try:
-                optimizer.zero_grad()
                 noise_recov = householder(vs) @ noise_estimate
                 noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
                 x_gen = x_noisy - noise_recov
                 x_gen = upsample_trans(x_gen)
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
+
+                optimizer.zero_grad()
                 nll.backward()
-                torch.nn.utils.clip_grad_value_(vs, 5)
                 optimizer.step()
 
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
