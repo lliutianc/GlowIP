@@ -261,10 +261,14 @@ def GlowDenoiser(args):
                 x_gen = x_noisy - noise_recov
                 x_gen = upsample_trans(x_gen)
                 x_gen = torch.clamp(x_gen, 0., 1.)
-                nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
-
+                z = glow(glow.preprocess(x_gen * 255))[0]
+                z = glow.flatten_z(z)
+                loss = (z ** 2).sum(1).mean()
+                
+                # nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
+                # loss = nll
                 optimizer.zero_grad()
-                logpz.backward()
+                loss.backward()
                 optimizer.step()
 
                 residual.append(nll.item())
