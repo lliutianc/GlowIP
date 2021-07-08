@@ -262,7 +262,7 @@ def GlowDenoiser(args):
 
                 residual.append(nll.item())
                 optimizer.zero_grad()
-                nll.backward()
+                nll.backward(retain_graph=True)
                 optimizer.step()
 
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
@@ -272,7 +272,7 @@ def GlowDenoiser(args):
                 print(f'\rStep={t}|'
                       f'Loss={nll.item():.4f}|'
                       f'PSNR(noisy)={psnr:.3f}', end='\r')
-                
+
                 if t % args.eval_every == 0:
                     with torch.no_grad():
                         noise_recov = householder(vs) @ noise_estimate
