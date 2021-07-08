@@ -266,7 +266,7 @@ def GlowDenoiser(args):
                     nll.backward(retain_graph=True)
                     torch.nn.utils.clip_grad_value_(vs, 5)
 
-                    psnr = psnr_t(x_noisy, x_gen)
+                    psnr = psnr_t(upsample_trans(x_noisy), x_gen)
                     psnr = 10 * np.log10(1 / psnr.item())
                     print(f'\rStep={t}|'
                           f'Loss={nll.item():.4f}|'
