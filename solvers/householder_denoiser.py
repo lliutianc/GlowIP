@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from torchvision import datasets
 import torchvision.transforms as transforms
@@ -145,7 +146,8 @@ def GlowDenoiser(args):
     test_dataset = datasets.ImageFolder(test_folder, transform=trans)
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batchsize,
                                                   drop_last=False, shuffle=False)
-    upsample_trans = transforms.Compose([transforms.Resize((64, 64))])
+    upsample_trans = lambda x: F.interpolate(x, size=(64, 64))
+    # upsample_trans = transforms.Compose([transforms.Resize((64, 64))])
     # loading glow configurations
     config_path = modeldir+"/configs.json"
     with open(config_path, 'r') as f:
@@ -194,6 +196,9 @@ def GlowDenoiser(args):
         x_noisy = torch.clamp(x_noisy, 0., 1.)
 
         x_test_up = upsample_trans(x_noisy)
+
+        print(x_test.shape, x_test_up.shape)
+
         # making a forward to record shapes of z's for reverse pass
         _ = glow(glow.preprocess(torch.zeros_like(x_test_up)))
 
