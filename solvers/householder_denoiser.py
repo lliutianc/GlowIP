@@ -260,43 +260,44 @@ def GlowDenoiser(args):
                 x_gen = upsample_trans(x_gen)
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
 
+                residual.append(nll.item())
                 optimizer.zero_grad()
                 nll.backward()
                 optimizer.step()
 
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
                 psnr = 10 * np.log10(1 / psnr.item())
+                psnr_hist.append(psnr)
+
                 print(f'\rStep={t}|'
                       f'Loss={nll.item():.4f}|'
                       f'PSNR(noisy)={psnr:.3f}', end='\r')
-
-                residual.append(nll.item())
-                psnr_hist.append(psnr)
-
+                
                 if t % args.eval_every == 0:
-                    noise_recov = householder(vs) @ noise_estimate
-                    noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
-                    x_gen = x_noisy - noise_recov
-                    x_gen = upsample_trans(x_gen)
-                    z = glow(glow.preprocess(x_gen * 255, clone=True))[0]
+                    with torch.no_grad():
+                        noise_recov = householder(vs) @ noise_estimate
+                        noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
+                        x_gen = x_noisy - noise_recov
+                        x_gen = upsample_trans(x_gen)
+                        z = glow(glow.preprocess(x_gen * 255, clone=True))[0]
 
-                    x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
-                    x_gen_np = np.clip(x_gen_np, 0, 1)
-                    z_flat = glow.flatten_z(z).data.cpu().numpy()
+                        x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
+                        x_gen_np = np.clip(x_gen_np, 0, 1)
+                        z_flat = glow.flatten_z(z).data.cpu().numpy()
 
-                    if t in Recovered_per_10_steps:
-                        Recovered_per_10_steps[t].append(x_gen_np)
-                    else:
-                        Recovered_per_10_steps[t] = [x_gen_np]
+                        if t in Recovered_per_10_steps:
+                            Recovered_per_10_steps[t].append(x_gen_np)
+                        else:
+                            Recovered_per_10_steps[t] = [x_gen_np]
 
-                    if t in Recovered_base_per_10_steps:
-                        Recovered_base_per_10_steps[t].append(z_flat)
-                    else:
-                        Recovered_base_per_10_steps[t] = [z_flat]
+                        if t in Recovered_base_per_10_steps:
+                            Recovered_base_per_10_steps[t].append(z_flat)
+                        else:
+                            Recovered_base_per_10_steps[t] = [z_flat]
 
-                    del z_flat, z, x_gen, x_gen_np, noise_recov
-                    with torch.cuda.device(args.device):
-                        torch.cuda.empty_cache()
+                        del z_flat, z, x_gen, x_gen_np, noise_recov
+                        with torch.cuda.device(args.device):
+                            torch.cuda.empty_cache()
 
             except Exception as e:
                 traceback.print_exc()
