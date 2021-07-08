@@ -279,7 +279,7 @@ def GlowDenoiser(args):
                 psnr_hist.append(psnr)
 
                 print(f'\rStep={t}|'
-                      f'Loss={nll.item():.4f}|'
+                      f'Loss={loss.item():.4f}|'
                       f'PSNR(noisy)={psnr:.3f}, (real)={psnr_real:.3f}', end='\r')
 
                 if t % args.eval_every == 0:
