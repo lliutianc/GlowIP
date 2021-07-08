@@ -199,8 +199,6 @@ def GlowDenoiser(args):
 
         x_test_up = upsample_trans(x_noisy)
 
-        print(x_test.shape, x_test_up.shape)
-
         # making a forward to record shapes of z's for reverse pass
         _ = glow(glow.preprocess(torch.zeros_like(x_test_up)))
 
@@ -233,7 +231,8 @@ def GlowDenoiser(args):
         noise_recov = householder(vs) @ noise_estimate
         noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
         x_gen = x_noisy + noise_recov
-        x_gen = upsample_trans(x_gen)
+        if x_gen.shape[-1] < args.size:
+            x_gen = upsample_trans(x_gen)
         x_gen = torch.clamp(x_gen, 0., 1.)
         z = glow(glow.preprocess(x_gen * 255, clone=True))[0]
 
@@ -259,15 +258,17 @@ def GlowDenoiser(args):
             try:
                 noise_recov = householder(vs) @ noise_estimate
                 noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
-                x_gen = x_noisy - noise_recov
-                x_gen = upsample_trans(x_gen)
+                x_gen = x_noisy + noise_recov
+                if x_gen.shape[-1] < args.size:
+                    x_gen = upsample_trans(x_gen)
                 x_gen = torch.clamp(x_gen, 0., 1.)
-                z = glow(glow.preprocess(x_gen * 255))[0]
-                z = glow.flatten_z(z)
-                loss = (z ** 2).sum(1).mean()
 
-                # nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
-                # loss = nll
+                # z = glow(glow.preprocess(x_gen * 255))[0]
+                # z = glow.flatten_z(z)
+                # loss = (z ** 2).sum(1).mean()
+
+                nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
+                loss = nll
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -288,7 +289,8 @@ def GlowDenoiser(args):
                         noise_recov = householder(vs) @ noise_estimate
                         noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
                         x_gen = x_noisy + noise_recov
-                        x_gen = upsample_trans(x_gen)
+                        if x_gen.shape[-1] < args.size:
+                            x_gen = upsample_trans(x_gen)
                         z = glow(glow.preprocess(x_gen * 255, clone=True))[0]
 
                         x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
@@ -334,7 +336,8 @@ def GlowDenoiser(args):
             noise_recov = householder(vs) @ noise_estimate
             noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
             x_gen = x_noisy + noise_recov
-            x_gen = upsample_trans(x_gen)
+            if x_gen.shape[-1] < args.size:
+                x_gen = upsample_trans(x_gen)
             x_gen = torch.clamp(x_gen, 0., 1.)
             x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
             x_gen_np = np.clip(x_gen_np, 0, 1)
