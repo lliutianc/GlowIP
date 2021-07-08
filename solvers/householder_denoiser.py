@@ -259,7 +259,7 @@ def GlowDenoiser(args):
                 x_gen = x_noisy - noise_recov
                 x_gen = upsample_trans(x_gen)
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
-
+                print(nll)
                 residual.append(nll.item())
                 nll.backward(retain_graph=False)
                 optimizer.step()
