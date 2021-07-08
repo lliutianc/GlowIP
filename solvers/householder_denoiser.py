@@ -330,13 +330,14 @@ def GlowDenoiser(args):
             x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
             x_gen_np = np.clip(x_gen_np, 0, 1)
             Recovered.append(x_gen_np)
+
+            del x_test, x_gen, optimizer, psnr_t, noise_recov, glow, noise
         except Exception as e:
             traceback.print_exc()
 
         # freeing up memory for second loop
         glow.zero_grad()
         optimizer.zero_grad()
-        del x_test, x_gen, optimizer, psnr_t, noise_recov, glow, noise
         with torch.cuda.device(args.device):
             torch.cuda.empty_cache()
         print("\nbatch completed")
