@@ -309,8 +309,7 @@ def GlowDenoiser(args):
                                 increase_step = 0
 
                                 delta = x_noisy - x_gen
-                                delta = delta.view(len(x_noisy), -1)
-                                delta = delta.view().data.cpu().numpy()
+                                delta = delta.view(len(x_noisy), -1).data.cpu().numpy()
 
                                 if eval_psnr is not None:
                                     # If PSNR between recovered and noisy was increased,
