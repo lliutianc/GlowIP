@@ -119,15 +119,16 @@ def householder_caster(b, n, device):
     Qs = torch.zeros(b, n, n, device=device, requires_grad=True)
 
     def compute_householder_matrix(vs):
-        for i in range(b):
-            Q = torch.eye(n, device=device)
-            for v in vs:
-                vi = v[i].view(-1, 1)
-                vi = vi / vi.norm()
-                Qi = I - 2 * torch.mm(vi, vi.permute(1, 0))
-                Q = torch.mm(Q, Qi)
-            Qs[i] += Q
-            del Q
+        with torch.no_grad():
+            for i in range(b):
+                Q = torch.eye(n, device=device)
+                for v in vs:
+                    vi = v[i].view(-1, 1)
+                    vi = vi / vi.norm()
+                    Qi = I - 2 * torch.mm(vi, vi.permute(1, 0))
+                    Q = torch.mm(Q, Qi)
+                Qs[i] += Q
+                del Q
         return Qs
     return compute_householder_matrix
 
@@ -260,11 +261,12 @@ def GlowDenoiser(args):
                 x_gen = x_noisy - noise_recov
                 x_gen = upsample_trans(x_gen)
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
-                residual.append(nll.item())
+
                 optimizer.zero_grad()
-                nll.backward(retain_graph=True)
+                nll.backward()
                 optimizer.step()
 
+                residual.append(nll.item())
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
                 psnr = 10 * np.log10(1 / psnr.item())
                 psnr_hist.append(psnr)
