@@ -322,7 +322,7 @@ def GlowDenoiser(args):
                                     # then too much noise was modeled by GLOW.
                                     increase_step += (args.noise_scale - delta.std(1)).sum()
 
-                                print('increase_step')
+                                print(increase_step, '\n')
                                 gamma *= (1 + base_step * increase_step)
 
                             del z_unflat, x_gen, x_gen_np, z_flatted
