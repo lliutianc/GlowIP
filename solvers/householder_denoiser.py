@@ -335,9 +335,6 @@ def GlowDenoiser(args):
         except Exception as e:
             traceback.print_exc()
 
-        # freeing up memory for second loop
-        glow.zero_grad()
-        optimizer.zero_grad()
         with torch.cuda.device(args.device):
             torch.cuda.empty_cache()
         print("\nbatch completed")
