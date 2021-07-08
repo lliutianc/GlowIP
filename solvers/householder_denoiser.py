@@ -212,7 +212,7 @@ def GlowDenoiser(args):
         vs = [nn.Parameter(torch.randn(n_test, n, device=args.device),
                            requires_grad=True) for _ in range(householder_iter)]
         # optimizer
-        optimizer = torch.optim.Adam(vs, lr=args.lr)
+        optimizer = torch.optim.SGD(vs, lr=args.lr)
 
         # to be recorded over iteration
         z_original_unflat = glow(glow.preprocess(x_test_up * 255, clone=True))[0]
