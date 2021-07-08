@@ -264,14 +264,14 @@ def GlowDenoiser(args):
                 z = glow(glow.preprocess(x_gen * 255))[0]
                 z = glow.flatten_z(z)
                 loss = (z ** 2).sum(1).mean()
-                
+
                 # nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
                 # loss = nll
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-                residual.append(nll.item())
+                residual.append(loss.item())
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
                 psnr_real = psnr_t(upsample_trans(x_test), x_gen)
                 psnr_real = 10 * np.log10(1 / psnr_real.item())
