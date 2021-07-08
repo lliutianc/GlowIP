@@ -136,7 +136,7 @@ def GlowDenoiser(args):
 
     n = args.size * args.size * 3
     # modeldir      = f"./trained_models/{args.dataset}/glow-denoising"
-    modeldir = f"./trained_models/{args.dataset}/glow-cs-{args.size}"
+    modeldir = f"./trained_models/{args.dataset}/glow-cs-64"
     test_folder = f"./test_images/{args.dataset}_N=12"
     save_path = f"./results/{args.dataset}/{args.experiment}"
     # loading dataset
