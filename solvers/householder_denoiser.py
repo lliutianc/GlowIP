@@ -252,7 +252,9 @@ def GlowDenoiser(args):
             Recovered_base_per_10_steps[t] = [z_flat]
 
         del z_flat, z, x_gen, x_gen_np, noise_recov
-
+        with torch.cuda.device(args.device):
+            torch.cuda.empty_cache()
+            
         for t in range(1, args.steps + 1):
             try:
                 def closure():
@@ -300,6 +302,8 @@ def GlowDenoiser(args):
                         Recovered_base_per_10_steps[t] = [z_flat]
 
                     del z_flat, z, x_gen, x_gen_np, noise_recov
+                    with torch.cuda.device(args.device):
+                        torch.cuda.empty_cache()
 
             except Exception as e:
                 traceback.print_exc()
@@ -332,6 +336,9 @@ def GlowDenoiser(args):
             Recovered.append(x_gen_np)
 
             del x_test, x_gen, optimizer, psnr_t, noise_recov, glow, noise
+            with torch.cuda.device(args.device):
+                torch.cuda.empty_cache()
+
         except Exception as e:
             traceback.print_exc()
 
