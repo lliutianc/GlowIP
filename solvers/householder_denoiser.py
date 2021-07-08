@@ -196,11 +196,16 @@ def GlowDenoiser(args):
         noise = noiser(x_test)
         x_noisy = x_test + noise
         x_noisy = torch.clamp(x_noisy, 0., 1.)
-
-        x_test_up = upsample_trans(x_noisy)
-
+        if x_noisy.shape[-1] < 64:
+            x_noisy_up = upsample_trans(x_noisy)
+            x_test_up = upsample_trans(x_test)
+        else:
+            x_noisy_up = x_noisy
+            x_test_up = x_test
+            
+        print(x_noisy.shape)
         # making a forward to record shapes of z's for reverse pass
-        _ = glow(glow.preprocess(torch.zeros_like(x_test_up)))
+        _ = glow(glow.preprocess(torch.zeros_like(x_noisy_up)))
 
         noise_estimate = np.random.normal(args.noise_loc, args.noise_scale, [n_test, n, 1])
         noise_estimate = torch.from_numpy(noise_estimate).float().to(args.device)
