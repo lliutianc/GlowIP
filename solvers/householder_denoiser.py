@@ -202,7 +202,7 @@ def GlowDenoiser(args):
         else:
             x_noisy_up = x_noisy
             x_test_up = x_test
-            
+
         print(x_noisy.shape)
         # making a forward to record shapes of z's for reverse pass
         _ = glow(glow.preprocess(torch.zeros_like(x_noisy_up)))
@@ -215,7 +215,7 @@ def GlowDenoiser(args):
         vs = [nn.Parameter(torch.randn(n_test, n, device=args.device),
                            requires_grad=True) for _ in range(householder_iter)]
         # optimizer
-        optimizer = torch.optim.SGD(vs, lr=args.lr)
+        optimizer = torch.optim.Adam(vs, lr=args.lr)
 
         # to be recorded over iteration
         z_original_unflat = glow(glow.preprocess(x_test_up * 255, clone=True))[0]
@@ -276,6 +276,7 @@ def GlowDenoiser(args):
                 loss = nll
                 optimizer.zero_grad()
                 loss.backward()
+                torch.nn.utils.clip_grad_value_(vs, 5)
                 optimizer.step()
 
                 residual.append(loss.item())
