@@ -264,7 +264,7 @@ def GlowDenoiser(args):
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
 
                 optimizer.zero_grad()
-                nll.backward()
+                logpz.backward()
                 optimizer.step()
 
                 residual.append(nll.item())
