@@ -186,7 +186,7 @@ def GlowDenoiser(args):
                     nn_init_last_zeros=configs["last_zeros"],
                     device=args.device)
         glow.load_state_dict(torch.load(modeldir+"/glowmodel.pt", map_location=args.device))
-        # glow.eval()
+        glow.eval()
 
         householder = householder_caster(n_test, n, args.device)
 
@@ -260,10 +260,10 @@ def GlowDenoiser(args):
                 x_gen = upsample_trans(x_gen)
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
                 print(nll)
-                residual.append(nll.item())
-                nll.backward(retain_graph=False)
-                optimizer.step()
+                # residual.append(nll.item())
                 optimizer.zero_grad()
+                nll.backward()
+                optimizer.step()
 
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
                 psnr = 10 * np.log10(1 / psnr.item())
