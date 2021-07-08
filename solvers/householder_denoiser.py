@@ -115,9 +115,9 @@ def recon_loss(noise, loc, scale):
 
 def householder_caster(b, n, device):
     I = torch.eye(n, device=device, requires_grad=False)
-
+    global Qs
+    Qs = torch.zeros(b, n, n, device=device)
     def compute_householder_matrix(vs):
-        Qs = []
         for i in range(b):
             Q = torch.eye(n, device=device)
             for v in vs:
@@ -125,7 +125,7 @@ def householder_caster(b, n, device):
                 vi = vi / vi.norm()
                 Qi = I - 2 * torch.mm(vi, vi.permute(1, 0))
                 Q = torch.mm(Q, Qi)
-            Qs.append(Q)
+            Qs[i] = Q
         return torch.stack(Qs)
     return compute_householder_matrix
 
