@@ -126,6 +126,7 @@ def householder_caster(b, n, device):
                 Qi = I - 2 * torch.mm(vi, vi.permute(1, 0))
                 Q = torch.mm(Q, Qi)
             Qs[i] = Q
+            del Q
         return torch.stack(Qs)
     return compute_householder_matrix
 
