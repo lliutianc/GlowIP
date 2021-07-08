@@ -232,7 +232,7 @@ def GlowDenoiser(args):
         # save initial results.
         t = 0
         noise_recov = householder(vs) @ noise_estimate
-        noise_recov = noise_recov.view(n_test, args.size, args.size)
+        noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
         x_gen = x_noisy - noise_recov
         x_gen = upsample_trans(x_gen)
         z = glow(glow.preprocess(x_gen * 255, clone=True))
@@ -258,8 +258,8 @@ def GlowDenoiser(args):
                 def closure():
                     global nll, psnr
                     optimizer.zero_grad()
-                    noise_flat = householder(vs) @ noise_estimate
-                    noise_recov = noise_flat.view(n_test, args.size, args.size)
+                    noise_recov = householder(vs) @ noise_estimate
+                    noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
                     x_gen = x_noisy - noise_recov
                     x_gen = upsample_trans(x_gen)
                     nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
@@ -324,7 +324,7 @@ def GlowDenoiser(args):
         x_gen = None
         try:
             noise_recov = householder(vs) @ noise_estimate
-            noise_recov = noise_recov.view(n_test, args.size, args.size)
+            noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
             x_gen = x_noisy - noise_recov
             x_gen = upsample_trans(x_gen)
             x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
