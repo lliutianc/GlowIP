@@ -210,7 +210,7 @@ def GlowDenoiser(args):
         vs = [nn.Parameter(torch.randn(n_test, n, device=args.device),
                            requires_grad=True) for _ in range(householder_iter)]
         # optimizer
-        optimizer = torch.optim.Adam(vs, lr=0.01)
+        optimizer = torch.optim.Adam(vs, lr=args.lr)
 
         # to be recorded over iteration
         z_original_unflat = glow(glow.preprocess(x_test_up * 255, clone=True))[0]
@@ -261,9 +261,9 @@ def GlowDenoiser(args):
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen))
 
                 residual.append(nll.item())
-                optimizer.zero_grad()
                 nll.backward(retain_graph=True)
                 optimizer.step()
+                optimizer.zero_grad()
 
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
                 psnr = 10 * np.log10(1 / psnr.item())
