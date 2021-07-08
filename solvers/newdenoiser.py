@@ -273,7 +273,7 @@ def GlowDenoiser(args):
                             print(f'\rStep={t}|'
                                   f'Loss={loss_t.item():.4f}|'
                                   f'Residual={residual_t.item():.4f}|'
-                                  f'Reg_z={z_reg_loss_t.item():.5f}|'
+                                  f'Reg_z={z_reg_loss_t.item():.5f}|gamma={gamma.item():.4f}|'
                                   f'PSNR(noisy)={psnr:.3f}', end='\r')
 
                             return loss_t
