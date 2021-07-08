@@ -140,7 +140,7 @@ def GlowDenoiser(args):
         # loss
         loss = recon_loss(args.noise, args.noise_loc, args.noise_scale)
         # regularizor
-        gamma = torch.tensor(gamma, requires_grad=True, dtype=torch.float, device=args.device)
+        gamma = torch.tensor(gamma, requires_grad=False, dtype=torch.float, device=args.device)
 
         # results to save
         Original = []
