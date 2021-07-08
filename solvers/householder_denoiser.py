@@ -116,7 +116,7 @@ def recon_loss(noise, loc, scale):
 
 def householder_caster(b, n, device):
     I = torch.eye(n, device=device, requires_grad=False)
-    Qs = torch.zeros(b, n, n, device=device, requires_grad=True)
+    Qs = torch.zeros(b, n, n, device=device, requires_grad=False)
 
     def compute_householder_matrix(vs):
         with torch.no_grad():
@@ -260,6 +260,8 @@ def GlowDenoiser(args):
                 noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
                 x_gen = x_noisy - noise_recov
                 x_gen = upsample_trans(x_gen)
+                print(x_gen.max(), x_gen.min())
+                exit(1)
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
 
                 optimizer.zero_grad()
