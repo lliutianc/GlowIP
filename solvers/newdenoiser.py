@@ -305,7 +305,7 @@ def GlowDenoiser(args):
                                 # If so, we increase gamma to force base to move towards 0.
                                 # Else, we decrease gamma.
 
-                                base_step = 0.001
+                                base_step = 0.1
                                 increase_step = 0
 
                                 delta = x_noisy - x_gen
