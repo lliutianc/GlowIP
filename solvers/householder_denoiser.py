@@ -214,6 +214,7 @@ def GlowDenoiser(args):
         householder_iter = args.householder_iter or n
         vs = [nn.Parameter(torch.randn(n_test, n, device=args.device),
                            requires_grad=True) for _ in range(householder_iter)]
+        print(len(vs), vs[0].shape)
         # optimizer
         optimizer = torch.optim.Adam(vs, lr=args.lr)
 
