@@ -1,7 +1,7 @@
 import argparse
-from solvers.denoiser import solveDenoising
-from solvers.redenoiser import solveDenoising as solveDenoisingWithRestart
-
+# from solvers.denoiser import solveDenoising
+# from solvers.redenoiser import solveDenoising as solveDenoisingWithRestart
+from solvers.newdenoiser import solveDenoising
 import torch
 
 
@@ -10,6 +10,7 @@ if __name__ == "__main__":
     # task details: prior, dataset, image size
     parser.add_argument('-experiment', type=str, help='the name of experiment', default='denoising')
     parser.add_argument('-restart_denoise', type=int, default=1)
+    parser.add_argument('-train_strategy', type='str', default='bilevel', choices=['none', 'bilevel', 'restart'])
     parser.add_argument('-prior', type=str, help='choose with prior to use glow, dcgan', default='glow')
     parser.add_argument('-dataset', type=str, help='the dataset/images to use', default='celeba')
     parser.add_argument('-size', type=int, help='size of images to resize all images to',
@@ -30,6 +31,7 @@ if __name__ == "__main__":
     parser.add_argument('-optim', type=str, help='optimizer', default="lbfgs")
     parser.add_argument('-lr', type=float, help='learning rate', default=1)
     parser.add_argument('-steps', type=int, help='no. of steps to run', default=50)
+    parser.add_argument('-eval_every', type=int, default=10)
     parser.add_argument('-batchsize', type=int, help='no. of images to solve in parallel as batches', default=6)
     parser.add_argument('-z_penalty_unsquared', action="store_true", help="use ||z|| if True else ||z||^2")
 
@@ -52,7 +54,9 @@ if __name__ == "__main__":
         # formal situation will handle the cuda allocation automatically
         args.device = torch.device(f'cuda' if torch.cuda.is_available() else 'cpu')
 
-    if args.restart_denoise:
-        solveDenoisingWithRestart(args)
-    else:
-        solveDenoising(args)
+    solveDenoising(args)
+    #
+    # if args.restart_denoise:
+    #     solveDenoisingWithRestart(args)
+    # else:
+    #     solveDenoising(args)
