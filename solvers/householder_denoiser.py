@@ -268,12 +268,14 @@ def GlowDenoiser(args):
 
                 residual.append(nll.item())
                 psnr = psnr_t(upsample_trans(x_noisy), x_gen)
+                psnr_real = psnr_t(upsample_trans(x_test), x_gen)
+                psnr_real = 10 * np.log10(1 / psnr_real.item())
                 psnr = 10 * np.log10(1 / psnr.item())
                 psnr_hist.append(psnr)
 
                 print(f'\rStep={t}|'
                       f'Loss={nll.item():.4f}|'
-                      f'PSNR(noisy)={psnr:.3f}', end='\r')
+                      f'PSNR(noisy)={psnr:.3f}, (real)={psnr_real:.3f}', end='\r')
 
                 if t % args.eval_every == 0:
                     with torch.no_grad():
