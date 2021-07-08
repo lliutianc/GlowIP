@@ -235,7 +235,7 @@ def GlowDenoiser(args):
         noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
         x_gen = x_noisy - noise_recov
         x_gen = upsample_trans(x_gen)
-        z = glow(glow.preprocess(x_gen * 255, clone=True))
+        z = glow(glow.preprocess(x_gen * 255, clone=True))[0]
 
         x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
         x_gen_np = np.clip(x_gen_np, 0, 1)
@@ -283,7 +283,7 @@ def GlowDenoiser(args):
                     noise_recov = noise_recov.view(n_test, args.size, args.size)
                     x_gen = x_noisy - noise_recov
                     x_gen = upsample_trans(x_gen)
-                    z = glow(glow.preprocess(x_gen * 255, clone=True))
+                    z = glow(glow.preprocess(x_gen * 255, clone=True))[0]
 
                     x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
                     x_gen_np = np.clip(x_gen_np, 0, 1)
