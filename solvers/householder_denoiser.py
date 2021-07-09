@@ -274,7 +274,8 @@ def GlowDenoiser(args):
                 # z = glow.flatten_z(z)
                 # loss = (z ** 2).sum(1).mean()
 
-                nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
+                # nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
+                nll, logdet, logpz, z_mu, z_std = glow.nll_loss(x_gen * 255)
                 loss = nll
                 loss.backward()
                 torch.nn.utils.clip_grad_value_(vs, 5)
