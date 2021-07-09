@@ -156,7 +156,6 @@ def GlowDenoiser(args):
         configs = json.load(f)
 
     noiser = Noiser(args, configs)
-    loss = recon_loss(args.noise, args.noise_loc, args.noise_scale)
 
     # results to save
     Original = []
@@ -212,7 +211,7 @@ def GlowDenoiser(args):
         noise_estimate = nn.Parameter(noise_estimate, requires_grad=False)
 
         householder_iter = args.householder_iter or n
-        vs = [nn.Parameter(torch.randn(n_test, n, device=args.device),
+        vs = [nn.Parameter(torch.randn(n_test, n, device=args.device) * .1,
                            requires_grad=True) for _ in range(householder_iter)]
         print(len(vs), vs[0].shape)
         # optimizer
@@ -262,6 +261,8 @@ def GlowDenoiser(args):
 
         for t in range(1, args.steps + 1):
             try:
+                optimizer.zero_grad()
+
                 noise_recov = householder(vs) @ noise_estimate
                 noise_recov = noise_recov.view(n_test, 3, args.size, args.size)
                 x_gen = x_noisy + noise_recov
@@ -275,18 +276,17 @@ def GlowDenoiser(args):
 
                 nll, logdet, logpz, z_mu, z_std = glow.nll_loss(glow.preprocess(x_gen * 255))
                 loss = nll
-                optimizer.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_value_(vs, 5)
                 optimizer.step()
 
                 residual.append(loss.item())
-                psnr = psnr_t(upsample_trans(x_noisy), x_gen)
-                psnr_real = psnr_t(upsample_trans(x_test), x_gen)
-                psnr_real = 10 * np.log10(1 / psnr_real.item())
+                psnr = psnr_t(x_noisy_up, x_gen)
                 psnr = 10 * np.log10(1 / psnr.item())
                 psnr_hist.append(psnr)
 
+                psnr_real = psnr_t(x_test_up, x_gen)
+                psnr_real = 10 * np.log10(1 / psnr_real.item())
                 print(f'\rStep={t}|'
                       f'Loss={loss.item():.4f}|'
                       f'PSNR(noisy)={psnr:.3f}, (real)={psnr_real:.3f}', end='\r')
