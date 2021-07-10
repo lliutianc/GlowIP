@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # task details: prior, dataset, image size
     parser.add_argument('-experiment', type=str, help='the name of experiment', default='denoising')
     parser.add_argument('-restart_denoise', type=int, default=1)
-    parser.add_argument('-train_strategy', type=str, default='householder', choices=['none', 'bilevel', 'restart', 'householder'])
+    parser.add_argument('-train_strategy', type=str, default='bilevel', choices=['none', 'bilevel', 'restart', 'householder'])
     parser.add_argument('-householder_iter', type=int, default=10)
 
     parser.add_argument('-prior', type=str, help='choose with prior to use glow, dcgan', default='glow')
@@ -54,7 +54,6 @@ if __name__ == "__main__":
     else:
         # formal situation will handle the cuda allocation automatically
         args.device = torch.device(f'cuda' if torch.cuda.is_available() else 'cpu')
-
 
     if args.train_strategy == 'householder':
         householderDenoiser(args)
