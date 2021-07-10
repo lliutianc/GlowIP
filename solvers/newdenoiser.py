@@ -156,6 +156,7 @@ def GlowDenoiser(args):
 
         Residual_Curve = []
         PSNR_Curve = []
+        gamma_Curve = []
         for i, data in enumerate(test_dataloader):
 
             x_test = data[0]
@@ -222,6 +223,7 @@ def GlowDenoiser(args):
             psnr_t = torch.nn.MSELoss().to(device=args.device)
             residual = []
             psnr_hist = []
+            gamma_hist = []
 
             # save initial results.
 
@@ -281,6 +283,7 @@ def GlowDenoiser(args):
                         optimizer.step(closure)
                         residual.append(residual_t.item())
                         psnr_hist.append(psnr)
+                        gamma_hist.append(gamma.item())
 
                         if t % args.eval_every == 0:
                             z_unflat = glow.unflatten_z(z_sampled, clone=True)
@@ -346,6 +349,7 @@ def GlowDenoiser(args):
 
             Residual_Curve.append(residual)
             PSNR_Curve.append(psnr_hist)
+            gamma_Curve.append(gamma_hist)
 
             x_gen = None
             try:
@@ -420,15 +424,17 @@ def GlowDenoiser(args):
 
             Residual_Curve = np.array(Residual_Curve).mean(axis=0)
             PSNR_Curve = np.array(PSNR_Curve).mean(axis=0)
-            np.save(save_path+"/residual_curve.npy", Residual_Curve)
-            np.save(save_path+"/psnr_curve.npy", PSNR_Curve)
+            gamma_Curve = np.array(gamma_Curve).mean(axis=0)
+            np.save(save_path + "/residual_curve.npy", Residual_Curve)
+            np.save(save_path + "/psnr_curve.npy", PSNR_Curve)
+            np.save(save_path + "/gamma_curve.npy", gamma_Curve)
 
-            np.save(save_path+"/original.npy", Original)
-            np.save(save_path+"/noisy.npy", Noisy)
-            np.save(save_path+"/noise.npy", Noise)
+            np.save(save_path + "/original.npy", Original)
+            np.save(save_path + "/noisy.npy", Noisy)
+            np.save(save_path + "/noise.npy", Noise)
 
-            np.save(save_path+"/base_noisy.npy", Noisy_base)
-            np.save(save_path+"/base_original.npy", Original_base)
+            np.save(save_path + "/base_noisy.npy", Noisy_base)
+            np.save(save_path + "/base_original.npy", Original_base)
 
             if len(Recovered_per_10_steps) > 0:
                 for t, checkpoints in Recovered_per_10_steps.items():
