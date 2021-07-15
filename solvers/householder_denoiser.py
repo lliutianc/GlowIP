@@ -1,12 +1,8 @@
-import numpy as np
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from torchvision import datasets
 import torchvision.transforms as transforms
-from skimage.measure import compare_psnr, compare_ssim
-import skimage.io as sio
 
 import json
 import os
