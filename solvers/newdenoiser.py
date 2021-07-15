@@ -21,7 +21,7 @@ from measurement.noiser import *
 from measurement.noiser import image_noise
 from utils import gettime
 
-
+transforms.ColorJitter
 def solveDenoising(args):
     if args.prior == 'glow':
         GlowDenoiser(args)
@@ -62,6 +62,41 @@ def Noiser(args, configs):
     noiser = NoisyMeasurement(noise, args.noise_channel, args.noise_area, args.device)
 
     return noiser
+
+
+def invertible_color_jitter(deviation, *augmentations):
+    aug = {'brightness': (0., 0.),
+           'contrast': (0., 0.),
+           'saturation': (0., 0.),
+           'hue': (0., 0.)}
+    invert_aug = {'brightness': (0., 0.),
+                  'contrast': (0., 0.),
+                  'saturation': (0., 0.),
+                  'hue': (0., 0.)}
+
+    for augment in augmentations:
+        if augment == 'hue':
+            hue_deviation = np.clip(deviation, -.5, .5)
+            aug[augment] = (hue_deviation, hue_deviation)
+            invert_aug[augment] = (-hue_deviation, -hue_deviation)
+        else:
+            classical_deviation = 1 + deviation
+            aug[augment] = (classical_deviation, classical_deviation)
+            invert_aug[augment] = (1 / classical_deviation, 1 / classical_deviation)
+
+    augmentation = torch.nn.Sequential(
+        transforms.ColorJitter(brightness=aug['brightness'],
+                               contrast=aug['contrast'],
+                               saturation=aug['saturation'],
+                               hue=aug['hue']))
+
+    invert_augmentation = torch.nn.Sequential(
+        transforms.ColorJitter(brightness=invert_aug['brightness'],
+                               contrast=invert_aug['contrast'],
+                               saturation=invert_aug['saturation'],
+                               hue=invert_aug['hue']))
+
+    return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
 
 
 def recon_loss(noise, loc, scale):
@@ -141,7 +176,11 @@ def GlowDenoiser(args):
         loss = recon_loss(args.noise, args.noise_loc, args.noise_scale)
         # regularizor
         gamma = torch.tensor(gamma, requires_grad=False, dtype=torch.float, device=args.device)
-
+        # augmentations
+        if args.augmentation:
+            aug, inv_aug = invertible_color_jitter(args.augmentation_deviation, args.augmentation)
+        else:
+            aug, inv_aug = None, None
         # results to save
         Original = []
         Noisy = []
@@ -161,6 +200,8 @@ def GlowDenoiser(args):
 
             x_test = data[0]
             x_test = x_test.clone().to(device=args.device)
+            if aug:
+                x_test = aug(x_test)
             n_test = x_test.size()[0]
             assert n_test == args.batchsize, \
                 "please make sure that no. of images are evenly divided by batchsize"
@@ -231,6 +272,8 @@ def GlowDenoiser(args):
             z_unflat = glow.unflatten_z(z_sampled, clone=True)
             x_gen = glow(z_unflat, reverse=True, reverse_clone=True)
             x_gen = glow.postprocess(x_gen, floor_clamp=False)
+            if inv_aug:
+                x_gen = inv_aug(x_gen)
 
             x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
             x_gen_np = np.clip(x_gen_np, 0, 1)
@@ -289,6 +332,8 @@ def GlowDenoiser(args):
                             z_unflat = glow.unflatten_z(z_sampled, clone=True)
                             x_gen = glow(z_unflat, reverse=True, reverse_clone=True)
                             x_gen = glow.postprocess(x_gen, floor_clamp=False)
+                            if inv_aug:
+                                x_gen = inv_aug(x_gen)
 
                             x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
                             x_gen_np = np.clip(x_gen_np, 0, 1)
@@ -356,6 +401,8 @@ def GlowDenoiser(args):
                 z_unflat = glow.unflatten_z(z_sampled, clone=False)
                 x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
                 x_gen = glow.postprocess(x_gen, floor_clamp=False)
+                if inv_aug:
+                    x_gen = inv_aug(x_gen)
 
                 x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
                 x_gen_np = np.clip(x_gen_np, 0, 1)
