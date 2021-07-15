@@ -10,4 +10,4 @@
 *.DS_Store
 **/.DS_Store
 
-results/celeba/denoise
+/results/celeba/denoise/
