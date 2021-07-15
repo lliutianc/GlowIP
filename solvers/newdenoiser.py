@@ -58,14 +58,16 @@ def Noiser(args, configs):
 
 
 def invertible_color_jitter(deviation, augmentations):
-    aug = {'brightness': (0., 0.),
-           'contrast': (0., 0.),
-           'saturation': (0., 0.),
-           'hue': (0., 0.)}
-    invert_aug = {'brightness': (0., 0.),
-                  'contrast': (0., 0.),
-                  'saturation': (0., 0.),
-                  'hue': (0., 0.)}
+    aug = {'brightness': 0,
+           'contrast': 0,
+           'saturation': 0,
+           'hue': 0,
+          }
+    invert_aug = {'brightness': 0,
+                  'contrast': 0,
+                  'saturation': 0,
+                  'hue': 0,
+                  }
 
     for augment in augmentations:
         if augment == 'hue':
