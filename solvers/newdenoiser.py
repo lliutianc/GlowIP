@@ -459,7 +459,8 @@ def GlowDenoiser(args):
                                                 f'{args.noise_channel}_{args.noise_area}_'
                                                 f'{args.init_strategy}_{augs}_'
                                                 f'{round(gamma, 4)}_{gettime()}')
-
+            save_path = save_path.replace('__', '_')
+            
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             else:
