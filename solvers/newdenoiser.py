@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 import torch.nn as nn
-
+import torchvision
 from torchvision import datasets
-from torchvision import transforms
+
 from skimage.measure import compare_psnr, compare_ssim
 import skimage.io as sio
 
@@ -87,17 +87,17 @@ def invertible_color_jitter(deviation, augmentations):
     print(aug, invert_aug)
 
     augmentation = torch.nn.Sequential(
-        transforms.ColorJitter(brightness=aug['brightness'],
-                               contrast=aug['contrast'],
-                               saturation=aug['saturation'],
-                               hue=aug['hue'])
+        torchvision.transforms.ColorJitter(brightness=aug['brightness'],
+                                           contrast=aug['contrast'],
+                                           saturation=aug['saturation'],
+                                           hue=aug['hue'])
         )
 
     invert_augmentation = torch.nn.Sequential(
-        transforms.ColorJitter(brightness=invert_aug['brightness'],
-                               contrast=invert_aug['contrast'],
-                               saturation=invert_aug['saturation'],
-                               hue=invert_aug['hue'])
+        torchvision.transforms.ColorJitter(brightness=invert_aug['brightness'],
+                                           contrast=invert_aug['contrast'],
+                                           saturation=invert_aug['saturation'],
+                                           hue=invert_aug['hue'])
         )
 
     return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
@@ -164,13 +164,13 @@ def GlowDenoiser(args):
         test_folder = f"./test_images/{args.dataset}_N=12"
         save_path = f"./results/{args.dataset}/{args.experiment}"
         # loading dataset
-        trans = transforms.Compose([transforms.Resize((args.size, args.size)),
-                                    transforms.ToTensor()])
+        trans = torchvision.transforms.Compose([torchvision.transforms.Resize((args.size, args.size)),
+                                                torchvision.transforms.ToTensor()])
         test_dataset = datasets.ImageFolder(test_folder, transform=trans)
         test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batchsize,
                                                       drop_last=False, shuffle=False)
         # loading glow configurations
-        config_path = modeldir+"/configs.json"
+        config_path = modeldir + "/configs.json"
         with open(config_path, 'r') as f:
             configs = json.load(f)
 
