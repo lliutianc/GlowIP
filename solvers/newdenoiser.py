@@ -84,6 +84,8 @@ def invertible_color_jitter(deviation, augmentations):
             aug[augment] = (classical_deviation, classical_deviation)
             invert_aug[augment] = (1 / classical_deviation, 1 / classical_deviation)
 
+    print(aug, invert_aug)
+
     augmentation = torch.nn.Sequential(
         transforms.ColorJitter(brightness=aug['brightness'],
                                contrast=aug['contrast'],
