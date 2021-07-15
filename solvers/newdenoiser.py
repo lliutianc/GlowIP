@@ -368,10 +368,10 @@ def GlowDenoiser(args):
                                     increase_step += psnr - eval_psnr
                                 eval_psnr = psnr
 
-                                if args.noise == 'gaussian':
-                                    # If the std of gaussian noise is smaller than the known scale,
-                                    # then too much noise was modeled by GLOW.
-                                    increase_step += (args.noise_scale - delta.std(1)).sum()
+                                # if args.noise == 'gaussian':
+                                #     # If the std of gaussian noise is smaller than the known scale,
+                                #     # then too much noise was modeled by GLOW.
+                                #     increase_step += (args.noise_scale - delta.std(1)).sum()
 
                                 print(increase_step, '\n')
                                 gamma *= (1 + base_step * increase_step)
