@@ -202,8 +202,6 @@ def GlowDenoiser(args):
 
             x_test = data[0]
             x_test = x_test.clone().to(device=args.device)
-            if aug:
-                x_test = aug(x_test)
             n_test = x_test.size()[0]
 
             assert n_test == args.batchsize, \
@@ -222,6 +220,8 @@ def GlowDenoiser(args):
             # add noise
             noise = noiser(x_test)
             x_noisy = x_test + noise
+            if aug:
+                x_noisy = aug(x_noisy)
             x_noisy = torch.clamp(x_noisy, 0., 1.)
 
             # making a forward to record shapes of z's for reverse pass
@@ -460,7 +460,7 @@ def GlowDenoiser(args):
                                                 f'{args.init_strategy}_{augs}_'
                                                 f'{round(gamma, 4)}_{gettime()}')
             save_path = save_path.replace('__', '_')
-            
+
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             else:
