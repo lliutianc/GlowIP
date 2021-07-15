@@ -63,14 +63,18 @@ if __name__ == "__main__":
         # formal situation will handle the cuda allocation automatically
         args.device = torch.device(f'cuda' if torch.cuda.is_available() else 'cpu')
 
-    for aug in ['brightness', 'contrast', 'saturation', 'hue']:
-        args.augmentation = [aug]
+    # for aug in ['brightness', 'contrast', 'saturation', 'hue']:
+    #     args.augmentation = [aug]
+    #
+    #     if args.train_strategy == 'householder':
+    #         householderDenoiser(args)
+    #     else:
+    #         solveDenoising(args)
 
-        if args.train_strategy == 'householder':
-            householderDenoiser(args)
-        else:
-            solveDenoising(args)
-        #
+    if args.train_strategy == 'householder':
+        householderDenoiser(args)
+    else:
+        solveDenoising(args)
 
     # if args.restart_denoise:
     #     solveDenoisingWithRestart(args)
