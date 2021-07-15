@@ -11,3 +11,5 @@
 **/.DS_Store
 
 /results/celeba/denoise/
+*.npy
+*.jpg
