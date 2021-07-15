@@ -90,14 +90,15 @@ def invertible_color_jitter(deviation, augmentations):
         torchvision.transforms.ColorJitter(brightness=aug['brightness'],
                                            contrast=aug['contrast'],
                                            saturation=aug['saturation'],
-                                           hue=aug['hue'])
+                                           hue=0.)
+                                           # hue=aug['hue'])
         )
 
     invert_augmentation = torch.nn.Sequential(
         torchvision.transforms.ColorJitter(brightness=invert_aug['brightness'],
                                            contrast=invert_aug['contrast'],
-                                           saturation=invert_aug['saturation'],
-                                           hue=invert_aug['hue'])
+                                           saturation=invert_aug['saturation'], hue=0.)
+                                           # hue=invert_aug['hue'])
         )
 
     return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
