@@ -455,7 +455,7 @@ def GlowDenoiser(args):
             save_path = os.path.join(save_path, f'{args.noise}_'
                                                 f'{args.noise_loc}#{args.noise_scale}_'
                                                 f'{args.noise_channel}_{args.noise_area}_'
-                                                f'{args.init_strategy}_{augs}'
+                                                f'{args.init_strategy}_{augs}_'
                                                 f'{round(gamma, 4)}_{gettime()}')
 
             if not os.path.exists(save_path):
