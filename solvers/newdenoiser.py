@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 from torchvision import datasets
-import torchvision.transforms as transforms
+from torchvision import transforms
 from skimage.measure import compare_psnr, compare_ssim
 import skimage.io as sio
 
