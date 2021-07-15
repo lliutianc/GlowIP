@@ -64,7 +64,7 @@ def Noiser(args, configs):
     return noiser
 
 
-def invertible_color_jitter(deviation, *augmentations):
+def invertible_color_jitter(deviation, augmentations):
     aug = {'brightness': (0., 0.),
            'contrast': (0., 0.),
            'saturation': (0., 0.),
@@ -450,10 +450,11 @@ def GlowDenoiser(args):
             gamma = gamma.item()
             file_names = [name[0].split("/")[-1].split(".")[0] for name in test_dataset.samples]
 
+            augs = '-'.join(args.augmentation)
             save_path = os.path.join(save_path, f'{args.noise}_'
                                                 f'{args.noise_loc}#{args.noise_scale}_'
                                                 f'{args.noise_channel}_{args.noise_area}_'
-                                                f'{args.init_strategy}_'
+                                                f'{args.init_strategy}_{augs}'
                                                 f'{round(gamma, 4)}_{gettime()}')
 
             if not os.path.exists(save_path):
