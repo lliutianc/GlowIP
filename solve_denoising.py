@@ -1,6 +1,4 @@
 import argparse
-from solvers.denoiser import solveDenoising
-from solvers.redenoiser import solveDenoising as solveDenoisingWithRestart
 from solvers.newdenoiser import solveDenoising
 from solvers.householder_denoiser import solveDenoising as householderDenoiser
 
@@ -64,7 +62,6 @@ if __name__ == "__main__":
     else:
         # formal situation will handle the cuda allocation automatically
         args.device = torch.device(f'cuda' if torch.cuda.is_available() else 'cpu')
-
 
     for aug in ['brightness', 'contrast', 'saturation', 'hue']:
         args.augmentation = [aug]
