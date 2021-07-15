@@ -64,6 +64,45 @@ def Noiser(args, configs):
     return noiser
 
 
+# def invertible_color_jitter(deviation, augmentations):
+#     aug = {'brightness': (0., 0.),
+#            'contrast': (0., 0.),
+#            'saturation': (0., 0.),
+#            'hue': (0., 0.)}
+#     invert_aug = {'brightness': (0., 0.),
+#                   'contrast': (0., 0.),
+#                   'saturation': (0., 0.),
+#                   'hue': (0., 0.)}
+#
+#     for augment in augmentations:
+#         if augment == 'hue':
+#             hue_deviation = np.clip(deviation, -.5, .5)
+#             aug[augment] = (hue_deviation, hue_deviation)
+#             invert_aug[augment] = (-hue_deviation, -hue_deviation)
+#         else:
+#             classical_deviation = 1 + deviation
+#             aug[augment] = (classical_deviation, classical_deviation)
+#             invert_aug[augment] = (1 / classical_deviation, 1 / classical_deviation)
+#
+#     print(aug, invert_aug)
+#
+#     augmentation = torch.nn.Sequential(
+#         torchvision.transforms.ColorJitter(brightness=aug['brightness'],
+#                                            contrast=aug['contrast'],
+#                                            saturation=aug['saturation'],
+#                                            hue=aug['hue'])
+#         )
+#
+#     invert_augmentation = torch.nn.Sequential(
+#         torchvision.transforms.ColorJitter(brightness=invert_aug['brightness'],
+#                                            contrast=invert_aug['contrast'],
+#                                            saturation=invert_aug['saturation'],
+#                                            hue=invert_aug['hue'])
+#         )
+#
+#     return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
+
+
 def invertible_color_jitter(deviation, augmentations):
     aug = {'brightness': (0., 0.),
            'contrast': (0., 0.),
@@ -84,24 +123,17 @@ def invertible_color_jitter(deviation, augmentations):
             aug[augment] = (classical_deviation, classical_deviation)
             invert_aug[augment] = (1 / classical_deviation, 1 / classical_deviation)
 
-    print(aug, invert_aug)
+    augmentation = torchvision.transforms.ColorJitter(brightness=aug['brightness'],
+                                                      contrast=aug['contrast'],
+                                                      saturation=aug['saturation'],
+                                                      hue=aug['hue'])
 
-    augmentation = torch.nn.Sequential(
-        torchvision.transforms.ColorJitter(brightness=aug['brightness'],
-                                           contrast=aug['contrast'],
-                                           saturation=aug['saturation'],
-                                           hue=0.)
-                                           # hue=aug['hue'])
-        )
+    invert_augmentation = torchvision.transforms.ColorJitter(brightness=invert_aug['brightness'],
+                                                             contrast=invert_aug['contrast'],
+                                                             saturation=invert_aug['saturation'],
+                                                             hue=invert_aug['hue'])
 
-    invert_augmentation = torch.nn.Sequential(
-        torchvision.transforms.ColorJitter(brightness=invert_aug['brightness'],
-                                           contrast=invert_aug['contrast'],
-                                           saturation=invert_aug['saturation'], hue=0.)
-                                           # hue=invert_aug['hue'])
-        )
-
-    return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
+    return augmentation, invert_augmentation
 
 
 def recon_loss(noise, loc, scale):
@@ -164,9 +196,23 @@ def GlowDenoiser(args):
         modeldir = f"./trained_models/{args.dataset}/glow-cs-{args.size}"
         test_folder = f"./test_images/{args.dataset}_N=12"
         save_path = f"./results/{args.dataset}/{args.experiment}"
+
+        # invertible augmentations
+        if args.augmentation:
+            aug, inv_aug = invertible_color_jitter(args.augmentation_deviation, args.augmentation)
+
+            trans = torchvision.transforms.Compose(
+                [torchvision.transforms.Resize((args.size, args.size)), aug,
+                 torchvision.transforms.ToTensor()])
+
+            inv_aug = torchvision.transforms.Compose(
+                [torchvision.transforms.ToPILImage(), inv_aug, torchvision.transforms.ToTensor()])
+        else:
+            trans = torchvision.transforms.Compose([torchvision.transforms.Resize((args.size, args.size)),
+                                                    torchvision.transforms.ToTensor()])
+            inv_aug = None
+
         # loading dataset
-        trans = torchvision.transforms.Compose([torchvision.transforms.Resize((args.size, args.size)),
-                                                torchvision.transforms.ToTensor()])
         test_dataset = datasets.ImageFolder(test_folder, transform=trans)
         test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batchsize,
                                                       drop_last=False, shuffle=False)
@@ -181,11 +227,7 @@ def GlowDenoiser(args):
         loss = recon_loss(args.noise, args.noise_loc, args.noise_scale)
         # regularizor
         gamma = torch.tensor(gamma, requires_grad=False, dtype=torch.float, device=args.device)
-        # augmentations
-        if args.augmentation:
-            aug, inv_aug = invertible_color_jitter(args.augmentation_deviation, args.augmentation)
-        else:
-            aug, inv_aug = None, None
+
         # results to save
         Original = []
         Noisy = []
@@ -205,8 +247,6 @@ def GlowDenoiser(args):
 
             x_test = data[0]
             x_test = x_test.clone().to(device=args.device)
-            if aug:
-                x_test = aug(x_test)
             n_test = x_test.size()[0]
             assert n_test == args.batchsize, \
                 "please make sure that no. of images are evenly divided by batchsize"
