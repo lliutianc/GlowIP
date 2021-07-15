@@ -21,7 +21,7 @@ from measurement.noiser import *
 from measurement.noiser import image_noise
 from utils import gettime
 
-transforms.ColorJitter
+
 def solveDenoising(args):
     if args.prior == 'glow':
         GlowDenoiser(args)
@@ -90,14 +90,14 @@ def invertible_color_jitter(deviation, augmentations):
         transforms.ColorJitter(brightness=aug['brightness'],
                                contrast=aug['contrast'],
                                saturation=aug['saturation'],
-                               hue=aug['hue']),
+                               hue=aug['hue'])
         )
 
     invert_augmentation = torch.nn.Sequential(
         transforms.ColorJitter(brightness=invert_aug['brightness'],
                                contrast=invert_aug['contrast'],
                                saturation=invert_aug['saturation'],
-                               hue=invert_aug['hue']),
+                               hue=invert_aug['hue'])
         )
 
     return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
