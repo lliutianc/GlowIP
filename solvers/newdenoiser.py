@@ -221,6 +221,7 @@ def GlowDenoiser(args):
             noise = noiser(x_test)
             x_noisy = x_test + noise
             if aug:
+                aug_mask = (x_noisy == aug(x_noisy))
                 x_noisy = aug(x_noisy)
             x_noisy = torch.clamp(x_noisy, 0., 1.)
 
@@ -276,7 +277,7 @@ def GlowDenoiser(args):
             x_gen = glow(z_unflat, reverse=True, reverse_clone=True)
             x_gen = glow.postprocess(x_gen, floor_clamp=False)
             if inv_aug:
-                x_gen = inv_aug(x_gen)
+                x_gen[aug_mask] = inv_aug(x_gen)[aug_mask]
 
             x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
             x_gen_np = np.clip(x_gen_np, 0, 1)
@@ -336,8 +337,7 @@ def GlowDenoiser(args):
                             x_gen = glow(z_unflat, reverse=True, reverse_clone=True)
                             x_gen = glow.postprocess(x_gen, floor_clamp=False)
                             if inv_aug:
-                                x_gen = inv_aug(x_gen)
-
+                                x_gen[aug_mask] = inv_aug(x_gen)[aug_mask]
                             x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
                             x_gen_np = np.clip(x_gen_np, 0, 1)
                             if t in Recovered_per_10_steps:
@@ -353,14 +353,11 @@ def GlowDenoiser(args):
 
                             if args.train_strategy == 'bilevel':
                                 # Evaluate if too much noise was modeled by GLOW.
-                                # If so, we increase gamma to force base to move towards 0.
+                                # If so, we increase gamma to force z to move towards 0.
                                 # Else, we decrease gamma.
 
                                 base_step = 0.5
                                 increase_step = 0
-
-                                delta = x_noisy - x_gen
-                                delta = delta.view(len(x_noisy), -1).data.cpu().numpy()
 
                                 if eval_psnr is not None:
                                     # If PSNR between recovered and noisy was increased,
@@ -371,6 +368,8 @@ def GlowDenoiser(args):
                                 # if args.noise == 'gaussian':
                                 #     # If the std of gaussian noise is smaller than the known scale,
                                 #     # then too much noise was modeled by GLOW.
+                                #     delta = x_noisy - x_gen
+                                #     delta = delta.view(len(x_noisy), -1).data.cpu().numpy()
                                 #     increase_step += (args.noise_scale - delta.std(1)).sum()
 
                                 print(increase_step, '\n')
@@ -405,7 +404,7 @@ def GlowDenoiser(args):
                 x_gen = glow(z_unflat, reverse=True, reverse_clone=False)
                 x_gen = glow.postprocess(x_gen, floor_clamp=False)
                 if inv_aug:
-                    x_gen = inv_aug(x_gen)
+                    x_gen[aug_mask] = inv_aug(x_gen)[aug_mask]
 
                 x_gen_np = x_gen.data.cpu().numpy().transpose(0, 2, 3, 1)
                 x_gen_np = np.clip(x_gen_np, 0, 1)
