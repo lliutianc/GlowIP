@@ -98,6 +98,19 @@ def invertible_color_jitter(deviation, augmentations):
     return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
 
 
+def invertible_mnist_normalize():
+    augmentation = torch.nn.Sequential(
+        torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        )
+
+    invert_augmentation = torch.nn.Sequential(
+        torchvision.transforms.Normalize((-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225),
+                                         (1 / 0.229, 1 / 0.244, 1 / 0.225))
+        )
+
+    return torch.jit.script(augmentation), torch.jit.script(invert_augmentation)
+
+
 def recon_loss(noise, loc, scale):
     if noise == 'gaussian':
         def _recon(x_gen, x_noisy):
@@ -161,7 +174,11 @@ def GlowDenoiser(args):
 
         # invertible augmentations
         if args.augmentation:
-            aug, inv_aug = invertible_color_jitter(args.augmentation_deviation, args.augmentation)
+            if args.augmentation == 'normalize':
+                aug, inv_aug = invertible_mnist_normalize()
+            else:
+                aug, inv_aug = invertible_color_jitter(args.augmentation_deviation,
+                                                       args.augmentation)
         else:
             aug, inv_aug = None, None
 
