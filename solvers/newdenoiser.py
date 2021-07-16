@@ -238,7 +238,7 @@ def GlowDenoiser(args):
             noise = noiser(x_test)
             x_noisy = x_test + noise
             if aug:
-                aug_mask = (x_noisy == aug(x_noisy))
+                aug_mask = (x_noisy != aug(x_noisy))
                 x_noisy = aug(x_noisy)
             x_noisy = torch.clamp(x_noisy, 0., 1.)
 
