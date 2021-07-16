@@ -470,6 +470,8 @@ def GlowDenoiser(args):
             file_names = [name[0].split("/")[-1].split(".")[0] for name in test_dataset.samples]
 
             augs = '-'.join(args.augmentation)
+            if args.augmentation != ['normalize']:
+                augs += f'#{args.augmentation_deviation}'
             save_path = os.path.join(save_path, f'{args.noise}_'
                                                 f'{args.noise_loc}#{args.noise_scale}_'
                                                 f'{args.noise_channel}_{args.noise_area}_'
