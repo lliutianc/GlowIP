@@ -174,7 +174,7 @@ def GlowDenoiser(args):
 
         # invertible augmentations
         if args.augmentation:
-            if args.augmentation == 'normalize':
+            if args.augmentation == ['normalize']:
                 aug, inv_aug = invertible_mnist_normalize()
             else:
                 aug, inv_aug = invertible_color_jitter(args.augmentation_deviation,
